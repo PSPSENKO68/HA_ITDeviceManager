@@ -587,7 +587,28 @@ export function ApplicationTab({ data, allDevices = [], onSave }: ApplicationTab
                   className="form-input"
                   placeholder={`Nhập hoặc chọn ${DISPLAY_LABELS[field] || field}...`}
                   value={newRow[field] || ''}
-                  onChange={e => setNewRow({ ...newRow, [field]: e.target.value })}
+                  onChange={e => {
+                    const val = e.target.value;
+                    let updates: any = { [field]: val };
+                    if (val && allDevices.length > 0) {
+                      if (field === 'Owner') {
+                        const matched = allDevices.find(d => String(d.Owner || '').trim().toLowerCase() === val.toLowerCase());
+                        if (matched) {
+                          if (!newRow.PhongBan) updates.PhongBan = matched.PhongBan || '';
+                          if (!newRow.May) updates.May = matched.Model || matched.SerialNumber || '';
+                        }
+                      } else if (field === 'May') {
+                        const matched = allDevices.find(d => 
+                          String(d.Model || d.SerialNumber || '').trim().toLowerCase() === val.toLowerCase()
+                        );
+                        if (matched) {
+                          if (!newRow.Owner) updates.Owner = matched.Owner || '';
+                          if (!newRow.PhongBan) updates.PhongBan = matched.PhongBan || '';
+                        }
+                      }
+                    }
+                    setNewRow({ ...newRow, ...updates });
+                  }}
                 />
               ) : field === 'UngDung' ? (
                 <input
@@ -665,7 +686,28 @@ export function ApplicationTab({ data, allDevices = [], onSave }: ApplicationTab
                     className="form-input"
                     placeholder={`Nhập hoặc chọn ${DISPLAY_LABELS[field] || field}...`}
                     value={editRow[field] || ''}
-                    onChange={e => setEditRow({ ...editRow, [field]: e.target.value })}
+                    onChange={e => {
+                      const val = e.target.value;
+                      let updates: any = { [field]: val };
+                      if (val && allDevices.length > 0) {
+                        if (field === 'Owner') {
+                          const matched = allDevices.find(d => String(d.Owner || '').trim().toLowerCase() === val.toLowerCase());
+                          if (matched) {
+                            if (!editRow.PhongBan) updates.PhongBan = matched.PhongBan || '';
+                            if (!editRow.May) updates.May = matched.Model || matched.SerialNumber || '';
+                          }
+                        } else if (field === 'May') {
+                          const matched = allDevices.find(d => 
+                            String(d.Model || d.SerialNumber || '').trim().toLowerCase() === val.toLowerCase()
+                          );
+                          if (matched) {
+                            if (!editRow.Owner) updates.Owner = matched.Owner || '';
+                            if (!editRow.PhongBan) updates.PhongBan = matched.PhongBan || '';
+                          }
+                        }
+                      }
+                      setEditRow({ ...editRow, ...updates });
+                    }}
                   />
                 ) : field === 'UngDung' ? (
                   <input
