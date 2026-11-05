@@ -1,0 +1,690 @@
+/* ============================================================
+   HA GROUP IT ASSET MANAGEMENT - DESKTOP PRO DESIGN SYSTEM
+   Brand Identity: Hoang Anh Flavors & Food Ingredients
+   Brand Palette:
+     - Brand 1: #E07242 (RGBA: 226, 114, 66) - Cam đậm (Primary)
+     - Brand 2: #E5853F (RGBA: 229, 133, 63) - Cam nhạt (Primary Hover / Accent)
+     - Brand 3: #677B40 (RGBA: 103, 123, 64) - Xanh lá đậm (Success)
+     - Brand 4: #E9C691 (RGBA: 233, 198, 145) - Da người / Cream Warm (Highlight)
+     - Brand 5: #DCDCDC (RGBA: 220, 220, 220) - Gainsboro (Default Border)
+     - Brand 6: #D3D3D3 (RGBA: 211, 211, 211) - Light Gray (Subtle Border)
+     - Brand 7: #C9E6E1 (RGBA: 201, 230, 225) - Light Mint / Aqua Gray (Soft Info)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Brand Constants */
+  --brand-orange-dark: #E07242;
+  --brand-orange-light: #E5853F;
+  --brand-green-dark: #677B40;
+  --brand-peach: #E9C691;
+  --brand-gainsboro: #DCDCDC;
+  --brand-gray-light: #D3D3D3;
+  --brand-mint-light: #C9E6E1;
+
+  /* Application Layout Backgrounds */
+  --bg-app: #fcfbfa;
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #faf8f5;
+  
+  --border-default: var(--brand-gainsboro);
+  --border-subtle: var(--brand-gray-light);
+  
+  --text-primary: #1d1d1f;
+  --text-secondary: #48484a;
+  --text-muted: #76767c;
+  
+  /* Brand Actions */
+  --color-primary: var(--brand-orange-dark);
+  --color-primary-hover: var(--brand-orange-light);
+  --color-primary-light: rgba(226, 114, 66, 0.12);
+  
+  --color-success: var(--brand-green-dark);
+  --color-success-light: rgba(103, 123, 64, 0.15);
+
+  --color-warning: #c26922;
+  --color-warning-light: rgba(233, 198, 145, 0.38);
+
+  --color-danger: #d70015;
+  --color-danger-light: rgba(215, 0, 21, 0.12);
+
+  --color-purple: #8944ab;
+  --color-purple-light: rgba(137, 68, 171, 0.12);
+
+  --color-teal: #3b8b80;
+  --color-teal-light: rgba(201, 230, 225, 0.6);
+  
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-hover: 0 6px 16px rgba(226, 114, 66, 0.08);
+  
+  --sidebar-width: 250px;
+}
+
+/* Base resets & Typography */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-size: 13.5px;
+  line-height: 1.5;
+  letter-spacing: -0.012em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Modern Thin Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-pill);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-orange-dark);
+}
+
+/* ============================================================
+   DESKTOP APP LAYOUT
+   ============================================================ */
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.app-sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100%;
+  user-select: none;
+  z-index: 10;
+}
+
+.sidebar-header {
+  padding: 20px 20px 16px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-logo {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--brand-orange-dark) 0%, var(--brand-orange-light) 100%);
+  color: white;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 8px rgba(226, 114, 66, 0.35);
+}
+
+.sidebar-brand-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.sidebar-brand-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Navigation Menu */
+.sidebar-nav {
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.nav-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 10px 12px 4px 12px;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+}
+
+.sidebar-nav-link i {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  transition: color 0.15s ease;
+  width: 20px;
+  text-align: center;
+}
+
+.sidebar-nav-link:hover {
+  background-color: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+.sidebar-nav-link:hover i {
+  color: var(--color-primary);
+}
+
+.sidebar-nav-link.active {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.sidebar-nav-link.active i {
+  color: var(--color-primary);
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border-subtle);
+  background-color: #fdfcfb;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.db-status-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background-color: white;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.db-status-pill:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-success);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(103, 123, 64, 0.25);
+  display: inline-block;
+}
+
+/* Main Content Area */
+.app-main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-app);
+}
+
+/* Topbar */
+.app-topbar {
+  height: 52px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  flex-shrink: 0;
+}
+
+.topbar-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Content Body */
+.app-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 24px 28px 40px 28px;
+}
+
+/* ============================================================
+   COMPONENTS - APPLE MINIMALIST + BRAND PALETTE
+   ============================================================ */
+
+/* Clean Cards */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-default) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-card) !important;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
+}
+
+.card-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 14px 20px;
+}
+
+/* Apple Stat Cards */
+.stat-card {
+  background: white;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.stat-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+.stat-icon.blue, .stat-icon.orange {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+.stat-icon.green {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+.stat-icon.purple {
+  background: var(--color-purple-light);
+  color: var(--color-purple);
+}
+.stat-icon.amber {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+}
+.stat-icon.mint {
+  background: var(--color-teal-light);
+  color: var(--color-teal);
+}
+
+.stat-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+/* Clean Tables */
+.table {
+  color: var(--text-primary);
+  margin-bottom: 0;
+}
+
+.table thead th {
+  background-color: #faf9f7;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-default);
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+  font-size: 13.5px;
+}
+
+.table-hover tbody tr {
+  transition: background-color 0.1s ease;
+}
+.table-hover tbody tr:hover {
+  background-color: #faf7f3;
+}
+
+/* Pastel Badge Pills with Brand Identity */
+.badge {
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11.5px;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-blue, .bg-primary-subtle {
+  background-color: var(--color-primary-light) !important;
+  color: var(--color-primary) !important;
+  border: 1px solid rgba(226, 114, 66, 0.3) !important;
+}
+
+.badge-green, .bg-success-subtle {
+  background-color: var(--color-success-light) !important;
+  color: var(--color-success) !important;
+  border: 1px solid rgba(103, 123, 64, 0.3) !important;
+}
+
+.badge-purple, .bg-purple-subtle {
+  background-color: var(--color-purple-light) !important;
+  color: var(--color-purple) !important;
+  border: 1px solid rgba(137, 68, 171, 0.25) !important;
+}
+
+.badge-amber, .bg-warning-subtle {
+  background-color: var(--color-warning-light) !important;
+  color: var(--color-warning) !important;
+  border: 1px solid rgba(233, 198, 145, 0.6) !important;
+}
+
+.badge-red, .bg-danger-subtle {
+  background-color: var(--color-danger-light) !important;
+  color: var(--color-danger) !important;
+  border: 1px solid rgba(215, 0, 21, 0.25) !important;
+}
+
+.badge-gray, .bg-secondary-subtle {
+  background-color: #f2f2f2 !important;
+  color: #636366 !important;
+  border: 1px solid var(--brand-gainsboro) !important;
+}
+
+.badge-mint, .bg-info-subtle {
+  background-color: var(--color-teal-light) !important;
+  color: var(--color-teal) !important;
+  border: 1px solid rgba(74, 140, 130, 0.3) !important;
+}
+
+/* Modern Input & Controls */
+.form-control, .form-select {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  padding: 8px 14px;
+  font-size: 13.5px;
+  background-color: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(226, 114, 66, 0.18);
+  outline: none;
+}
+
+/* Modern Buttons */
+.btn {
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 8px 16px;
+  transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(226, 114, 66, 0.25);
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(226, 114, 66, 0.35);
+}
+
+.btn-outline-primary {
+  color: var(--color-primary);
+  border-color: rgba(226, 114, 66, 0.4);
+  background-color: white;
+}
+.btn-outline-primary:hover, .btn-outline-primary:focus {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.btn-success {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+  color: #ffffff;
+}
+.btn-success:hover, .btn-success:focus {
+  background-color: #556633;
+  border-color: #556633;
+  color: #ffffff;
+}
+
+.btn-outline-success {
+  color: var(--color-success);
+  border-color: rgba(103, 123, 64, 0.4);
+  background-color: white;
+}
+.btn-outline-success:hover {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+  color: white;
+}
+
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 12.5px;
+  border-radius: var(--radius-sm);
+}
+
+/* Category Filter Chips / Pills */
+.filter-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-chip {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: white;
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.filter-chip:hover {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.filter-chip.active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+}
+
+/* Bootstrap Theme Overrides for Consistent Brand Coloring */
+.text-primary {
+  color: var(--color-primary) !important;
+}
+.bg-primary {
+  background-color: var(--color-primary) !important;
+}
+.border-primary {
+  border-color: var(--color-primary) !important;
+}
+
+.text-success {
+  color: var(--color-success) !important;
+}
+.bg-success {
+  background-color: var(--color-success) !important;
+}
+.border-success {
+  border-color: var(--color-success) !important;
+}
+
+.border-warning {
+  border-color: var(--brand-orange-light) !important;
+}
+
+/* ============================================================
+   TABLE ACTIONS - STRICTLY 1 HORIZONTAL ROW (NO WRAP)
+   ============================================================ */
+.actions-col {
+  width: 135px !important;
+  min-width: 135px !important;
+  white-space: nowrap !important;
+  text-align: right !important;
+}
+
+.table-actions {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 6px !important;
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+  vertical-align: middle;
+}
+
+.table-actions .btn {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: var(--radius-sm) !important;
+  flex-shrink: 0 !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  transition: all 0.15s ease !important;
+}
+
+.table-actions .btn:hover {
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   CALENDAR & MAINTENANCE SCHEDULE STYLES
+   ============================================================ */
+.calendar-table {
+  border-collapse: separate !important;
+  border-spacing: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.calendar-table th {
+  padding: 10px 8px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border-default) !important;
+}
+
+.calendar-table td {
+  border-color: rgba(220, 220, 220, 0.7) !important;
+  transition: background-color 0.15s ease;
+}
+
+.calendar-table td:hover {
+  background-color: rgba(226, 114, 66, 0.04);
+}
+
+.calendar-table td.bg-primary.bg-opacity-10 {
+  background-color: rgba(226, 114, 66, 0.08) !important;
+}
+
+.calendar-table .badge {
+  border-radius: 6px;
+  transition: all 0.12s ease;
+}
+
+.calendar-table .badge:hover {
+  filter: brightness(0.92);
+  transform: translateY(-1px);
+}

@@ -1,0 +1,145 @@
+@model ITAssetManagement.Models.ApplicationSoftware
+
+@{
+    ViewData["Title"] = "Thêm mới Phần mềm / Ứng dụng";
+    var users = ViewBag.Users as List<ITAssetManagement.Models.User> ?? new List<ITAssetManagement.Models.User>();
+    var devices = ViewBag.Devices as List<string> ?? new List<string>();
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Thêm Phần mềm / Ứng dụng mới
+                    </h5>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Gán cho Nhân sự (Users)</label>
+                            <select asp-for="UserId" class="form-select" id="userSelect" onchange="onUserChanged()">
+                                <option value="">-- Chọn nhân sự (Tùy chọn) --</option>
+                                @foreach (var u in users)
+                                {
+                                    <option value="@u.Id" data-fullname="@u.FullName" data-dept="@u.Department" selected="@(Model.UserId == u.Id)">
+                                        @u.FullName (@u.Username) - @u.Department
+                                    </option>
+                                }
+                            </select>
+                            <span asp-validation-for="UserId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Owner" class="form-label fw-semibold">Họ tên người dùng (Owner) <span class="text-danger">*</span></label>
+                            <input asp-for="Owner" class="form-control" id="ownerInput" required placeholder="Nhập tên người dùng..." />
+                            <span asp-validation-for="Owner" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="PhongBan" class="form-label fw-semibold">Phòng ban / Bộ phận</label>
+                            <input asp-for="PhongBan" class="form-control" id="deptInput" placeholder="Ví dụ: Phòng IT, Kế toán..." />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="May" class="form-label fw-semibold">Tên máy / Model thiết bị</label>
+                            <input asp-for="May" class="form-control" list="deviceList" placeholder="Ví dụ: LAPTOP-DELL-01..." />
+                            <datalist id="deviceList">
+                                @foreach (var dev in devices)
+                                {
+                                    <option value="@dev" />
+                                }
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 text-muted" />
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="UngDung" class="form-label fw-semibold">Tên phần mềm / Ứng dụng <span class="text-danger">*</span></label>
+                            <input asp-for="UngDung" class="form-control" list="commonApps" required placeholder="Gõ hoặc chọn phần mềm..." />
+                            <datalist id="commonApps">
+                                <option value="Office 365 (Word, Excel, PowerPoint, Outlook)" />
+                                <option value="Google Chrome" />
+                                <option value="Unikey" />
+                                <option value="Foxit PDF Reader" />
+                                <option value="Ultraviewer" />
+                                <option value="WinRAR" />
+                                <option value="Zalo Workplace" />
+                                <option value="Zoom Workplace" />
+                                <option value="AutoCAD" />
+                                <option value="PowerBI Desktop" />
+                                <option value="SS4U ERP" />
+                                <option value="Adobe Acrobat Pro" />
+                            </datalist>
+                            <span asp-validation-for="UngDung" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="LoaiPhanMem" class="form-label fw-semibold">Loại phần mềm</label>
+                            <select asp-for="LoaiPhanMem" class="form-select">
+                                <option value="Bản quyền">Bản quyền</option>
+                                <option value="Miễn phí">Miễn phí</option>
+                                <option value="Nội bộ">Nội bộ</option>
+                                <option value="Thử nghiệm">Thử nghiệm</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="TrangThai" class="form-label fw-semibold">Trạng thái</label>
+                            <select asp-for="TrangThai" class="form-select">
+                                <option value="Đang sử dụng">Đang sử dụng</option>
+                                <option value="Cần kiểm tra">Cần kiểm tra</option>
+                                <option value="Đã gỡ bỏ">Đã gỡ bỏ</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="NgayCaiDat" class="form-label fw-semibold">Ngày cài đặt (mm/dd/yyyy)</label>
+                            <input asp-for="NgayCaiDat" class="form-control" placeholder="08/01/2026" />
+                        </div>
+                        <div class="col-md-8">
+                            <label asp-for="LyDo" class="form-label fw-semibold">Lý do cài đặt</label>
+                            <input asp-for="LyDo" class="form-control" placeholder="Phục vụ thiết kế, xử lý dữ liệu..." />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="GhiChu" class="form-label fw-semibold">Ghi chú bổ sung</label>
+                        <textarea asp-for="GhiChu" class="form-control" rows="2" placeholder="Thông tin license key, thời hạn gia hạn..."></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-light border px-4">Hủy bỏ</a>
+                        <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check-lg me-1"></i> Lưu thông tin</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function onUserChanged() {
+            var select = document.getElementById('userSelect');
+            var selectedOption = select.options[select.selectedIndex];
+            if (selectedOption && selectedOption.value) {
+                var name = selectedOption.getAttribute('data-fullname');
+                var dept = selectedOption.getAttribute('data-dept');
+                if (name) document.getElementById('ownerInput').value = name;
+                if (dept) document.getElementById('deptInput').value = dept;
+            }
+        }
+    </script>
+}
+

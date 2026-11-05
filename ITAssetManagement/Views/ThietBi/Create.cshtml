@@ -1,0 +1,139 @@
+@model ITAssetManagement.Models.ThietBi
+
+@{
+    ViewData["Title"] = "Thêm mới thiết bị";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fw-bold mb-0"><i class="bi bi-plus-circle text-primary me-2"></i>Thêm thiết bị mới</h3>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+            </a>
+        </div>
+
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 fw-bold">
+                    <i class="bi bi-info-circle text-primary me-2"></i>1. Thông tin chung & Phân loại
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label asp-for="NhomThietBi" class="form-label fw-semibold">Nhóm thiết bị <span class="text-danger">*</span></label>
+                            <select asp-for="NhomThietBi" class="form-select" required>
+                                <option value="Máy tính">Máy tính / Laptop</option>
+                                <option value="Thiết bị mạng">Thiết bị mạng</option>
+                                <option value="Máy in">Máy in</option>
+                                <option value="Camera & Hạ tầng">Camera & Hạ tầng</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="PhanLoai" class="form-label">Phân loại cụ thể</label>
+                            <input asp-for="PhanLoai" class="form-control" placeholder="VD: Laptop, Desktop, Switch, Router..." />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Model" class="form-label fw-semibold">Tên Model / Thiết bị</label>
+                            <input asp-for="Model" class="form-control" placeholder="VD: HP ProBook 440 G7" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="SerialNumber" class="form-label fw-semibold">Số Serial Number</label>
+                            <input asp-for="SerialNumber" class="form-control font-monospace" placeholder="VD: 5CD0190WQ5" />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Alias" class="form-label">Tên gọi khác / Alias</label>
+                            <input asp-for="Alias" class="form-control" placeholder="VD: SW-TANG-2" />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Ipaddress" class="form-label">Địa chỉ IP (nếu có)</label>
+                            <input asp-for="Ipaddress" class="form-control" placeholder="VD: 192.168.1.100" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 fw-bold">
+                    <i class="bi bi-person-badge text-primary me-2"></i>2. Người sử dụng & Vị trí
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Owner" class="form-label">Người sử dụng (Owner)</label>
+                            <input asp-for="Owner" class="form-control" placeholder="Họ và tên nhân viên..." />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="PhongBan" class="form-label">Phòng ban / Bộ phận</label>
+                            <input asp-for="PhongBan" class="form-control" placeholder="VD: RnD, Commercial, Kế toán..." />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 fw-bold">
+                    <i class="bi bi-cpu text-primary me-2"></i>3. Cấu hình phần cứng (Áp dụng cho Máy tính)
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label asp-for="Cpu" class="form-label">CPU</label>
+                            <input asp-for="Cpu" class="form-control" placeholder="VD: Core i5 12th" />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Ram" class="form-label">Dung lượng RAM</label>
+                            <input asp-for="Ram" class="form-control" placeholder="VD: 8GB - 3200" />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="HardDisk" class="form-label">Ổ cứng (Hard Disk)</label>
+                            <input asp-for="HardDisk" class="form-control" placeholder="VD: 512GB SSD" />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Os" class="form-label">Hệ điều hành</label>
+                            <input asp-for="Os" class="form-control" placeholder="VD: Windows 11 Pro" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 fw-bold">
+                    <i class="bi bi-tools text-primary me-2"></i>4. Niên hạn & Bảo trì
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label asp-for="NienHanBanDau" class="form-label">Niên hạn ban đầu</label>
+                            <select asp-for="NienHanBanDau" class="form-select">
+                                <option value="Trong niên hạn">Trong niên hạn</option>
+                                <option value="Đã hết hạn">Đã hết hạn</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="KichHoat" class="form-label">Trạng thái kích hoạt</label>
+                            <select asp-for="KichHoat" class="form-select">
+                                <option value="Enabled">Enabled (Đang hoạt động)</option>
+                                <option value="Disabled">Disabled (Tạm ngưng/Hỏng)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="KhuyenNghiIt" class="form-label">Khuyến nghị IT</label>
+                            <input asp-for="KhuyenNghiIt" class="form-control" placeholder="VD: Đề xuất nâng cấp RAM..." />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mb-5">
+                <a asp-action="Index" class="btn btn-outline-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn btn-primary px-4 fw-bold">
+                    <i class="bi bi-save me-1"></i> Lưu thiết bị
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+

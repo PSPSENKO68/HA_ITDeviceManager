@@ -1,0 +1,191 @@
+@{
+    ViewData["Title"] = "Cấu hình Kết nối Máy chủ";
+    string server = ViewBag.Server ?? @".\SQLEXPRESS";
+    string database = ViewBag.Database ?? "ITAssetDB";
+    bool useWindowsAuth = ViewBag.UseWindowsAuth ?? true;
+    string userId = ViewBag.UserId ?? "";
+    bool isLocal = ViewBag.IsLocal ?? true;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1 text-dark">
+                    <i class="bi bi-database-gear text-primary me-2"></i>Cấu hình Kết nối CSDL (Local ↔ Server)
+                </h3>
+                <p class="text-muted small mb-0">Chuyển đổi linh hoạt giữa cơ sở dữ liệu trên máy tính cá nhân và Máy chủ công ty</p>
+            </div>
+            <div>
+                @if (isLocal)
+                {
+                    <span class="badge bg-secondary-subtle text-secondary px-3 py-2"><i class="bi bi-laptop me-1"></i>Đang chạy: Localhost</span>
+                }
+                else
+                {
+                    <span class="badge bg-success-subtle text-success px-3 py-2"><i class="bi bi-cloud-check me-1"></i>Đang chạy: Server Công ty</span>
+                }
+            </div>
+        </div>
+
+        <div class="card border-0 mb-4">
+            <div class="card-header bg-white py-3 fw-bold text-dark">
+                <i class="bi bi-sliders text-primary me-2"></i>1. Chọn chế độ máy chủ CSDL
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card p-3 border h-100 @(isLocal ? "border-primary" : "")" style="cursor: pointer; background: @(isLocal ? "var(--color-primary-light)" : "white");" onclick="selectMode('local')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="modeChoice" id="modeLocal" @(isLocal ? "checked" : "") onchange="selectMode('local')">
+                                <label class="form-check-label fw-bold text-dark" for="modeLocal">
+                                    <i class="bi bi-laptop me-1 text-primary"></i> Máy tính cá nhân (Localhost)
+                                </label>
+                            </div>
+                            <div class="small text-muted ps-4 mt-1">Dùng SQL Server Express nội bộ trên máy tính của bạn (<code>.\SQLEXPRESS</code>).</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card p-3 border h-100 @(!isLocal ? "border-primary" : "")" style="cursor: pointer; background: @(!isLocal ? "var(--color-primary-light)" : "white");" onclick="selectMode('server')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="modeChoice" id="modeServer" @(!isLocal ? "checked" : "") onchange="selectMode('server')">
+                                <label class="form-check-label fw-bold text-dark" for="modeServer">
+                                    <i class="bi bi-server me-1 text-primary"></i> Máy chủ công ty (Remote Server)
+                                </label>
+                            </div>
+                            <div class="small text-muted ps-4 mt-1">Kết nối vào SQL Server tập trung của công ty qua IP LAN hoặc Domain.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 mb-4">
+            <div class="card-header bg-white py-3 fw-bold text-dark">
+                <i class="bi bi-cpu text-primary me-2"></i>2. Thông số kết nối chi tiết
+            </div>
+            <div class="card-body p-4">
+                <form id="connectionForm" method="post" asp-action="SaveConnection">
+                    @Html.AntiForgeryToken()
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Tên Máy chủ / IP Host <span class="text-danger">*</span></label>
+                            <input type="text" name="server" id="serverInput" class="form-control font-monospace" value="@server" required placeholder=".\SQLEXPRESS hoặc 192.168.1.100" />
+                            <div class="form-text small text-muted">Ví dụ: <code>.\SQLEXPRESS</code> (máy cá nhân) hoặc <code>192.168.1.50\SQL2022</code> (máy chủ).</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Tên Database <span class="text-danger">*</span></label>
+                            <input type="text" name="database" id="databaseInput" class="form-control font-monospace" value="@database" required placeholder="ITAssetDB" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="useWindowsAuth" id="useWindowsAuth" value="true" @(useWindowsAuth ? "checked" : "") onchange="toggleAuth()">
+                            <label class="form-check-label fw-semibold" for="useWindowsAuth">
+                                Sử dụng Xác thực Windows (Windows Authentication - Khuyên dùng cho Local)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="sqlAuthSection" class="row g-3 mb-3 p-3 bg-light rounded" style="display: @(useWindowsAuth ? "none" : "flex");">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">SQL Username</label>
+                            <input type="text" name="userId" id="userIdInput" class="form-control" value="@userId" placeholder="sa" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Mật khẩu SQL</label>
+                            <input type="password" name="password" id="passwordInput" class="form-control" placeholder="••••••••" />
+                        </div>
+                    </div>
+
+                    <!-- Nút test kết nối -->
+                    <div class="d-flex align-items-center gap-2 my-4">
+                        <button type="button" class="btn btn-outline-primary" onclick="testConnection()">
+                            <i class="bi bi-lightning-charge me-1"></i> Kiểm tra kết nối thử nghiệm
+                        </button>
+                        <span id="testResult" class="small fw-semibold ms-2"></span>
+                    </div>
+
+                    <hr class="text-muted my-4" />
+
+                    <!-- Khóa bảo mật Admin -->
+                    <div class="p-3 bg-light rounded mb-4 border">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-shield-lock-fill text-danger me-2 fs-5"></i>
+                            <span class="fw-bold text-dark">Xác nhận quyền Quản trị (Admin Protection)</span>
+                        </div>
+                        <p class="small text-muted mb-2">
+                            Để tránh việc nhân viên tự ý thay đổi địa chỉ kết nối, vui lòng nhập mật khẩu Quản trị để lưu thay đổi.
+                        </p>
+                        <div class="col-md-6">
+                            <input type="password" name="adminPass" class="form-control" required placeholder="Nhập mật khẩu Admin..." />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-controller="ThietBi" asp-action="Index" class="btn btn-light border px-4">Hủy bỏ</a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check-lg me-1"></i> Lưu và Áp dụng kết nối
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function selectMode(mode) {
+            var serverInput = document.getElementById('serverInput');
+            var winAuth = document.getElementById('useWindowsAuth');
+
+            if (mode === 'local') {
+                serverInput.value = '.\\SQLEXPRESS';
+                winAuth.checked = true;
+                toggleAuth();
+                document.getElementById('modeLocal').checked = true;
+            } else {
+                if (serverInput.value === '.\\SQLEXPRESS' || serverInput.value === 'localhost' || serverInput.value === '.') {
+                    serverInput.value = '192.168.1.100'; // Gợi ý mẫu server
+                }
+                document.getElementById('modeServer').checked = true;
+            }
+        }
+
+        function toggleAuth() {
+            var isWin = document.getElementById('useWindowsAuth').checked;
+            var sqlAuth = document.getElementById('sqlAuthSection');
+            sqlAuth.style.display = isWin ? 'none' : 'flex';
+        }
+
+        async function testConnection() {
+            var resultSpan = document.getElementById('testResult');
+            resultSpan.innerHTML = '<span class="text-muted"><i class="spinner-border spinner-border-sm me-1"></i> Đang kiểm tra...</span>';
+
+            var formData = new FormData();
+            formData.append('server', document.getElementById('serverInput').value);
+            formData.append('database', document.getElementById('databaseInput').value);
+            formData.append('useWindowsAuth', document.getElementById('useWindowsAuth').checked);
+            formData.append('userId', document.getElementById('userIdInput') ? document.getElementById('userIdInput').value : '');
+            formData.append('password', document.getElementById('passwordInput') ? document.getElementById('passwordInput').value : '');
+
+            try {
+                var response = await fetch('@Url.Action("TestConnection", "Settings")', {
+                    method: 'POST',
+                    body: formData
+                });
+                var data = await response.json();
+                if (data.success) {
+                    resultSpan.innerHTML = '<span class="text-success"><i class="bi bi-check-circle-fill me-1"></i> ' + data.message + '</span>';
+                } else {
+                    resultSpan.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle-fill me-1"></i> ' + data.message + '</span>';
+                }
+            } catch (err) {
+                resultSpan.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle-fill me-1"></i> Lỗi: ' + err.message + '</span>';
+            }
+        }
+    </script>
+}

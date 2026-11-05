@@ -1,0 +1,237 @@
+@model ITAssetManagement.Models.LichSuBaoTri
+
+@{
+    ViewData["Title"] = "Chi tiết phiếu bảo trì #" + Model.Id;
+    var device = ViewBag.Device as ITAssetManagement.Models.ThietBi;
+    var user = ViewBag.DeviceUser as ITAssetManagement.Models.User;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Top Navigation -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <a asp-action="Index" class="text-decoration-none text-muted small">
+                    <i class="bi bi-arrow-left me-1"></i> Quay lại Danh sách Bảo trì
+                </a>
+                <h3 class="fw-bold text-dark mb-0 mt-1">
+                    <i class="bi bi-tools text-primary me-2"></i>Phiếu bảo trì #@Model.Id: @(Model.TieuDe ?? Model.LoaiHanhDong)
+                </h3>
+            </div>
+            <div class="d-flex gap-2">
+                @if (Model.TrangThai != "Hoàn thành")
+                {
+                    <form asp-action="QuickComplete" asp-route-id="@Model.Id" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Xác nhận hoàn thành việc bảo trì này?')">
+                            <i class="bi bi-check2-circle me-1"></i> Đánh dấu Hoàn thành
+                        </button>
+                    </form>
+                }
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-primary">
+                    <i class="bi bi-pencil me-1"></i> Chỉnh sửa
+                </a>
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-trash"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Maintenance Info -->
+            <div class="col-lg-7">
+                <!-- Status & Overview Card -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <span class="badge bg-light text-dark border px-2 py-1 mb-2">@Model.LoaiHanhDong</span>
+                                <h4 class="fw-bold text-dark mb-1">@(Model.TieuDe ?? "Bảo trì thiết bị")</h4>
+                                <div class="text-muted small">
+                                    Mã phiếu: <strong class="font-monospace text-dark">#BT-@Model.Id</strong>
+                                </div>
+                            </div>
+                            <div>
+                                @if (Model.TrangThai == "Hoàn thành")
+                                {
+                                    <span class="badge bg-success-subtle text-success fs-6 px-3 py-2 border border-success-subtle">
+                                        <i class="bi bi-check-circle-fill me-1"></i>Hoàn thành
+                                    </span>
+                                }
+                                else if (Model.TrangThai == "Đang xử lý")
+                                {
+                                    <span class="badge bg-info-subtle text-info fs-6 px-3 py-2 border border-info-subtle">
+                                        <i class="bi bi-gear-wide-connected me-1"></i>Đang xử lý
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning-subtle text-warning fs-6 px-3 py-2 border border-warning-subtle">
+                                        <i class="bi bi-clock-history me-1"></i>Kế hoạch
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        <hr class="my-3 text-muted" />
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="text-muted small mb-1">Ngày dự kiến</div>
+                                <div class="fw-semibold font-monospace text-dark">
+                                    <i class="bi bi-calendar-event me-1 text-warning"></i>@(Model.NgayDuKien ?? "Chưa đặt lịch")
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-muted small mb-1">Ngày thực hiện / hoàn tất</div>
+                                <div class="fw-semibold font-monospace text-dark">
+                                    <i class="bi bi-calendar-check me-1 text-success"></i>@(Model.NgayThucHien ?? "Chưa thực hiện")
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-muted small mb-1">Kỹ thuật viên / Đơn vị</div>
+                                <div class="fw-semibold text-dark">
+                                    <i class="bi bi-person-gear me-1 text-primary"></i>@(Model.NguoiThucHien ?? "—")
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-muted small mb-1">Tổng chi phí</div>
+                                <div class="fw-bold fs-5 text-danger">
+                                    @(Model.ChiPhi > 0 ? string.Format("{0:N0} VNĐ", Model.ChiPhi) : "0 VNĐ (Bảo hành/Nội bộ)")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Details Card -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <span class="fw-bold"><i class="bi bi-file-earmark-text text-primary me-2"></i>Nội dung kỹ thuật & Linh kiện</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label class="text-muted small fw-semibold mb-1">Linh kiện thay thế / nâng cấp:</label>
+                            @if (!string.IsNullOrEmpty(Model.LinhKienThayThe))
+                            {
+                                <div class="p-3 bg-light rounded-3 fw-semibold text-primary">
+                                    <i class="bi bi-cpu me-2"></i>@Model.LinhKienThayThe
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-muted small italic">Không thay thế linh kiện</div>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="text-muted small fw-semibold mb-1">Nội dung thao tác kỹ thuật / Hiện tượng lỗi:</label>
+                            <div class="p-3 bg-light rounded-3 text-dark" style="white-space: pre-line;">
+                                @(string.IsNullOrEmpty(Model.ChiTiet) ? "Chưa có mô tả chi tiết." : Model.ChiTiet)
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.GhiChu))
+                        {
+                            <div>
+                                <label class="text-muted small fw-semibold mb-1">Ghi chú bổ sung:</label>
+                                <div class="small text-muted border-start border-3 border-primary ps-2">
+                                    @Model.GhiChu
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Associated Device & User Info -->
+            <div class="col-lg-5">
+                <!-- Device Card -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                        <span class="fw-bold"><i class="bi bi-laptop text-primary me-2"></i>Thiết bị bảo trì</span>
+                        @if (device != null)
+                        {
+                            <a asp-controller="ThietBi" asp-action="Details" asp-route-id="@device.Id" class="btn btn-sm btn-outline-primary" style="font-size: 11px;">
+                                Xem hồ sơ máy <i class="bi bi-arrow-right"></i>
+                            </a>
+                        }
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <div class="text-muted small">Tên thiết bị / Model</div>
+                            <div class="fw-bold fs-6 text-dark">@(Model.Model ?? device?.Model ?? "Chưa rõ")</div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="text-muted small">Serial Number</div>
+                            <div class="badge bg-light text-dark font-monospace border px-2 py-1">
+                                @(Model.SerialNumber ?? device?.SerialNumber ?? "—")
+                            </div>
+                        </div>
+
+                        @if (device != null)
+                        {
+                            <div class="row g-2 pt-2 border-top">
+                                <div class="col-6">
+                                    <div class="text-muted small">Nhóm thiết bị</div>
+                                    <div class="small fw-semibold text-dark">@device.NhomThietBi</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-muted small">Phòng ban sử dụng</div>
+                                    <div class="small fw-semibold text-dark">@(device.PhongBan ?? "—")</div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(device.Cpu) || !string.IsNullOrEmpty(device.Ram))
+                                {
+                                    <div class="col-12 mt-2">
+                                        <div class="text-muted small">Cấu hình</div>
+                                        <div class="small text-muted font-monospace">@device.Cpu | @device.Ram | @device.HardDisk</div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Assigned User Card -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <span class="fw-bold"><i class="bi bi-person-badge text-primary me-2"></i>Người đang sử dụng thiết bị</span>
+                    </div>
+                    <div class="card-body p-4">
+                        @if (user != null)
+                        {
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 44px; height: 44px;">
+                                    @(user.FullName?.Substring(0, 1).ToUpper() ?? "U")
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">@user.FullName</div>
+                                    <div class="text-muted small">@user.Department</div>
+                                </div>
+                            </div>
+                            <div class="small text-muted mb-1"><i class="bi bi-envelope me-2"></i>@(user.Email ?? "—")</div>
+                            <div class="small text-muted"><i class="bi bi-briefcase me-2"></i>@(user.Position ?? "Nhân viên")</div>
+                            <div class="mt-3">
+                                <a asp-controller="Users" asp-action="Details" asp-route-id="@user.Id" class="btn btn-sm btn-light border w-100">
+                                    Xem hồ sơ nhân sự
+                                </a>
+                            </div>
+                        }
+                        else if (device != null && !string.IsNullOrEmpty(device.Owner))
+                        {
+                            <div class="fw-semibold text-dark mb-1">@device.Owner</div>
+                            <div class="text-muted small">@(device.PhongBan ?? "Chưa rõ phòng ban")</div>
+                        }
+                        else
+                        {
+                            <div class="text-muted small italic py-2">
+                                Thiết bị này chưa được gán cho nhân sự nào hoặc nằm trong kho dự phòng.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

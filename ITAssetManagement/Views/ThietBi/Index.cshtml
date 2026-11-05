@@ -1,0 +1,186 @@
+@model IEnumerable<ITAssetManagement.Models.ThietBi>
+
+@{
+    ViewData["Title"] = "Quản lý Thiết bị IT";
+    string currentNhom = ViewBag.CurrentNhom ?? "All";
+    string searchTerm = ViewBag.SearchTerm ?? "";
+    var groupCounts = ViewBag.GroupCounts as List<KeyValuePair<string, int>> ?? new List<KeyValuePair<string, int>>();
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-pc-display me-2 text-primary"></i>Danh mục Thiết bị IT
+        </h3>
+        <p class="text-muted small mb-0">Theo dõi cấu hình phần cứng, vòng đời, hạn sử dụng và người sử dụng</p>
+    </div>
+    <div>
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Thêm thiết bị mới
+        </a>
+    </div>
+</div>
+
+<!-- Modern Horizontal Filter Chips -->
+<div class="card border-0 mb-3">
+    <div class="card-body p-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="filter-pills">
+                <a asp-action="Index" asp-route-nhomThietBi="All" 
+                   class="filter-chip @(currentNhom == "All" ? "active" : "")">
+                    <span>Tất cả</span>
+                    <span class="badge rounded-pill bg-light text-dark ms-1">@ViewBag.TotalAll</span>
+                </a>
+                @foreach (var group in groupCounts)
+                {
+                    bool isSelected = currentNhom == group.Key;
+                    <a asp-action="Index" asp-route-nhomThietBi="@group.Key" 
+                       class="filter-chip @(isSelected ? "active" : "")">
+                        <span>@group.Key</span>
+                        <span class="badge rounded-pill @(isSelected ? "bg-white text-dark" : "bg-light text-muted") ms-1">@group.Value</span>
+                    </a>
+                }
+            </div>
+
+            <!-- Search form inline -->
+            <form method="get" asp-action="Index" class="d-flex gap-2 align-items-center ms-auto">
+                <input type="hidden" name="nhomThietBi" value="@currentNhom" />
+                <div class="input-group input-group-sm" style="width: 320px;">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="searchTerm" class="form-control border-start-0 ps-0" 
+                           placeholder="Tìm Model, Serial, User, IP..." value="@searchTerm" />
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary">Tìm</button>
+                @if (!string.IsNullOrEmpty(searchTerm) || currentNhom != "All")
+                {
+                    <a asp-action="Index" class="btn btn-sm btn-light border text-muted">Đặt lại</a>
+                }
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Main Data Table -->
+<div class="card border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4" style="width: 50px;">STT</th>
+                        <th>Nhóm & Loại</th>
+                        <th>Model / Thiết bị</th>
+                        <th>Serial Number</th>
+                        <th>IP & Cấu hình</th>
+                        <th>Người sử dụng</th>
+                        <th>Phòng ban</th>
+                        <th>Đầu tư / HSD</th>
+                        <th>Trạng thái</th>
+                        <th class="actions-col pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2 text-muted opacity-50"></i>
+                                Không tìm thấy thiết bị nào phù hợp.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        int stt = 1;
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-semibold text-muted">@stt</td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">@item.NhomThietBi</span>
+                                    @if (!string.IsNullOrEmpty(item.PhanLoai))
+                                    {
+                                        <div class="small text-muted mt-1">@item.PhanLoai</div>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark">@(item.Model ?? "—")</div>
+                                    @if (!string.IsNullOrEmpty(item.Alias))
+                                    {
+                                        <div class="small text-muted font-monospace">@item.Alias</div>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark font-monospace border">@(item.SerialNumber ?? "N/A")</span>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.Ipaddress))
+                                    {
+                                        <div><code class="text-primary fw-semibold">@item.Ipaddress</code></div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.Ram) || !string.IsNullOrEmpty(item.HardDisk))
+                                    {
+                                        <div class="small text-muted">RAM: @item.Ram | Disk: @item.HardDisk</div>
+                                    }
+                                    @if (string.IsNullOrEmpty(item.Ipaddress) && string.IsNullOrEmpty(item.Ram) && string.IsNullOrEmpty(item.HardDisk))
+                                    {
+                                        <span class="text-muted small">—</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="fw-medium text-dark">@(item.Owner ?? "—")</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-secondary border">@(item.PhongBan ?? "—")</span>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.ThoiGianDauTu))
+                                    {
+                                        <div class="small font-monospace text-dark"><i class="bi bi-calendar3 me-1 text-muted"></i>@item.ThoiGianDauTu</div>
+                                        @if (!string.IsNullOrEmpty(item.HsdbanDau))
+                                        {
+                                            <div class="small text-muted font-monospace">HSD: @item.HsdbanDau</div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">—</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.NienHanBanDau == "Đã hết hạn")
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger">Hết hạn</span>
+                                    }
+                                    else if (!string.IsNullOrEmpty(item.NienHanBanDau))
+                                    {
+                                        <span class="badge bg-success-subtle text-success">Trong hạn</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-muted border">@(item.KichHoat ?? "Active")</span>
+                                    }
+                                </td>
+                                <td class="actions-col pe-4">
+                                    <div class="table-actions">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary" title="Xem chi tiết">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-light border" title="Chỉnh sửa">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-light border text-danger" title="Xóa">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            stt++;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

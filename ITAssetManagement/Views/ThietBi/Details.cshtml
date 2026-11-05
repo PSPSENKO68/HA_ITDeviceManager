@@ -1,0 +1,241 @@
+@model ITAssetManagement.Models.ThietBi
+
+@{
+    ViewData["Title"] = "Chi tiết thiết bị: " + Model.Model;
+    var baoTriList = ViewBag.BaoTriList as List<ITAssetManagement.Models.LichSuBaoTri> ?? new List<ITAssetManagement.Models.LichSuBaoTri>();
+    var dieuChuyenList = ViewBag.DieuChuyenList as List<ITAssetManagement.Models.LichSuDieuChuyen> ?? new List<ITAssetManagement.Models.LichSuDieuChuyen>();
+    var linkedUser = ViewBag.LinkedUser as ITAssetManagement.Models.User;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1"><i class="bi bi-info-circle text-primary me-2"></i>@Model.Model</h3>
+                <span class="badge bg-primary">@Model.NhomThietBi</span>
+                @if (!string.IsNullOrEmpty(Model.PhanLoai))
+                {
+                    <span class="badge bg-secondary ms-1">@Model.PhanLoai</span>
+                }
+                <span class="badge bg-light text-dark border font-monospace ms-1">SN: @(Model.SerialNumber ?? "N/A")</span>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-controller="BienBan" asp-action="Create" asp-route-thietBiId="@Model.Id" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-file-earmark-diff me-1"></i> Lập biên bản
+                </a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">
+                    <i class="bi bi-pencil me-1"></i> Chỉnh sửa
+                </a>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3 fw-bold">
+                        <i class="bi bi-laptop text-primary me-2"></i>Thông số kỹ thuật & Vị trí
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-5 text-muted">Nhóm thiết bị</dt>
+                            <dd class="col-sm-7 fw-semibold">@Model.NhomThietBi</dd>
+
+                            <dt class="col-sm-5 text-muted">Phân loại</dt>
+                            <dd class="col-sm-7">@(Model.PhanLoai ?? "—")</dd>
+
+                            <dt class="col-sm-5 text-muted">Model</dt>
+                            <dd class="col-sm-7 fw-bold">@(Model.Model ?? "—")</dd>
+
+                            <dt class="col-sm-5 text-muted">Serial Number</dt>
+                            <dd class="col-sm-7 font-monospace">@(Model.SerialNumber ?? "—")</dd>
+
+                            <dt class="col-sm-5 text-muted">Tên gọi khác / Alias</dt>
+                            <dd class="col-sm-7">@(Model.Alias ?? "—")</dd>
+
+                            <dt class="col-sm-5 text-muted">Địa chỉ IP</dt>
+                            <dd class="col-sm-7"><code>@(Model.Ipaddress ?? "—")</code></dd>
+
+                            <dt class="col-sm-5 text-muted">CPU</dt>
+                            <dd class="col-sm-7">@(Model.Cpu ?? "—")</dd>
+
+                            <dt class="col-sm-5 text-muted">RAM</dt>
+                            <dd class="col-sm-7">@(Model.Ram ?? "—")</dd>
+
+                            <dt class="col-sm-5 text-muted">Ổ cứng (Hard Disk)</dt>
+                            <dd class="col-sm-7">@(Model.HardDisk ?? "—")</dd>
+
+                            <dt class="col-sm-5 text-muted">Hệ điều hành (OS)</dt>
+                            <dd class="col-sm-7">@(Model.Os ?? "—")</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white py-3 fw-bold">
+                        <i class="bi bi-person-check text-primary me-2"></i>Người dùng & Niên hạn sử dụng
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-5 text-muted">Người sở hữu</dt>
+                            <dd class="col-sm-7 fw-bold text-dark">
+                                @if (linkedUser != null)
+                                {
+                                    <span class="text-primary"><i class="bi bi-person-badge me-1"></i>@linkedUser.FullName</span>
+                                    <div class="small text-muted">Email: @(linkedUser.Email ?? "—")</div>
+                                }
+                                else
+                                {
+                                    @(Model.Owner ?? "—")
+                                }
+                            </dd>
+
+                            <dt class="col-sm-5 text-muted">Phòng ban / Bộ phận</dt>
+                            <dd class="col-sm-7">@(Model.PhongBan ?? "—")</dd>
+
+                            <dt class="col-sm-5 text-muted">Thời gian đầu tư</dt>
+                            <dd class="col-sm-7 font-monospace"><i class="bi bi-calendar-event me-1 text-primary"></i>@(Model.ThoiGianDauTu ?? "—")</dd>
+
+                            <dt class="col-sm-5 text-muted">HSD ban đầu</dt>
+                            <dd class="col-sm-7 font-monospace">@(Model.HsdbanDau ?? "—")</dd>
+
+                            <dt class="col-sm-5 text-muted">Thời gian bảo trì</dt>
+                            <dd class="col-sm-7 font-monospace">@(Model.ThoiGianBaoTri ?? "—")</dd>
+
+                            <dt class="col-sm-5 text-muted">HSD gia hạn</dt>
+                            <dd class="col-sm-7 font-monospace">@(Model.HsdgiaHan ?? "—")</dd>
+
+                            <dt class="col-sm-5 text-muted">Niên hạn ban đầu</dt>
+                            <dd class="col-sm-7">
+                                @if (Model.NienHanBanDau == "Đã hết hạn")
+                                {
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Đã hết hạn</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">@(Model.NienHanBanDau ?? "Trong niên hạn")</span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-5 text-muted">Trạng thái kích hoạt</dt>
+                            <dd class="col-sm-7">
+                                <span class="badge @(Model.KichHoat == "Enabled" ? "bg-success" : "bg-secondary")">@Model.KichHoat</span>
+                            </dd>
+
+                            <dt class="col-sm-5 text-muted">Đánh giá kỹ thuật</dt>
+                            <dd class="col-sm-7 text-dark">@(Model.DanhGiaKhiBaoTri ?? "—")</dd>
+
+                            <dt class="col-sm-5 text-muted">Khuyến nghị IT</dt>
+                            <dd class="col-sm-7 text-danger fw-semibold">@(Model.KhuyenNghiIt ?? "Không có")</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unified Maintenance Card (LichSuBaoTri) -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <span class="fw-bold"><i class="bi bi-tools text-primary me-2"></i>Lịch sử & Kế hoạch bảo trì (@baoTriList.Count)</span>
+                <a asp-controller="BaoTri" asp-action="Create" asp-route-thietBiId="@Model.Id" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus-lg me-1"></i> Lập phiếu bảo trì cho máy này
+                </a>
+            </div>
+            <div class="card-body p-0">
+                @if (!baoTriList.Any())
+                {
+                    <div class="text-center py-4 text-muted">Chưa có bản ghi bảo trì nào cho thiết bị này.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th class="ps-3">Ngày (mm/dd/yyyy)</th>
+                                    <th>Tiêu đề / Hành động</th>
+                                    <th>Nội dung chi tiết</th>
+                                    <th>Người thực hiện</th>
+                                    <th>Chi phí</th>
+                                    <th>Trạng thái</th>
+                                    <th class="text-end pe-3">Chi tiết</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var b in baoTriList)
+                                {
+                                    <tr>
+                                        <td class="ps-3 fw-semibold font-monospace">@(b.NgayThucHien ?? b.NgayDuKien ?? "—")</td>
+                                        <td>
+                                            <div class="fw-bold">@(b.TieuDe ?? b.LoaiHanhDong)</div>
+                                            <span class="badge bg-light text-secondary border">@b.LoaiHanhDong</span>
+                                        </td>
+                                        <td>@b.ChiTiet</td>
+                                        <td>@(b.NguoiThucHien ?? "—")</td>
+                                        <td class="text-danger fw-semibold">@(b.ChiPhi?.ToString("N0") ?? "0") VNĐ</td>
+                                        <td>
+                                            @if (b.TrangThai == "Hoàn thành")
+                                            {
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle">Hoàn thành</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Kế hoạch</span>
+                                            }
+                                        </td>
+                                        <td class="text-end pe-3">
+                                            <a asp-controller="BaoTri" asp-action="Details" asp-route-id="@b.Id" class="btn btn-sm btn-outline-secondary py-0 px-2" title="Xem chi tiết phiếu">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Transfer History Card (LichSuDieuChuyen) -->
+        @if (dieuChuyenList.Any())
+        {
+            <div class="card border-0 shadow-sm mb-5">
+                <div class="card-header bg-white py-3">
+                    <span class="fw-bold"><i class="bi bi-arrow-left-right text-primary me-2"></i>Lịch sử điều chuyển (@dieuChuyenList.Count)</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th class="ps-3">Ngày</th>
+                                    <th>Hành động</th>
+                                    <th>Từ người / Phòng ban</th>
+                                    <th>Sang người / Phòng ban</th>
+                                    <th>Chi tiết</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var d in dieuChuyenList)
+                                {
+                                    <tr>
+                                        <td class="ps-3 fw-semibold font-monospace">@(d.Ngay ?? "—")</td>
+                                        <td><span class="badge bg-info-subtle text-info">@d.LoaiHanhDong</span></td>
+                                        <td>@(d.OwnerCu ?? d.PhongBanCu ?? "—")</td>
+                                        <td>@(d.OwnerMoi ?? d.PhongBanMoi ?? "—")</td>
+                                        <td>@d.ChiTiet</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

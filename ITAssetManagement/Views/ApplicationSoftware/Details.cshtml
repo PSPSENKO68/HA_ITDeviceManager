@@ -1,0 +1,103 @@
+@model ITAssetManagement.Models.ApplicationSoftware
+
+@{
+    ViewData["Title"] = "Chi tiết Phần mềm - " + Model.UngDung;
+    var user = ViewBag.User as ITAssetManagement.Models.User;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-primary">
+                    <i class="bi bi-info-circle me-2"></i>Thông tin Chi tiết Phần mềm
+                </h5>
+                <div>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary btn-sm me-1">
+                        <i class="bi bi-pencil me-1"></i> Chỉnh sửa
+                    </a>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                    <div class="avatar bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style="width: 54px; height: 54px; font-size: 1.5rem;">
+                        <i class="bi bi-app"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1">@Model.UngDung</h4>
+                        <div>
+                            @if (Model.LoaiPhanMem != null && Model.LoaiPhanMem.Contains("quyền"))
+                            {
+                                <span class="badge bg-purple-subtle text-purple border me-2" style="background-color: #f3e8ff; color: #6f42c1;">
+                                    <i class="bi bi-shield-check me-1"></i>@Model.LoaiPhanMem
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary-subtle text-secondary border me-2">@(Model.LoaiPhanMem ?? "Nội bộ")</span>
+                            }
+                            <span class="badge bg-success-subtle text-success border">@(Model.TrangThai ?? "Đang dùng")</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="fw-bold text-muted small text-uppercase mb-3">Thông tin Người dùng & Máy</h6>
+                            <dl class="row mb-0">
+                                <dt class="col-sm-5 text-muted">Người sử dụng:</dt>
+                                <dd class="col-sm-7 fw-bold text-dark">@(Model.Owner ?? "—")</dd>
+
+                                <dt class="col-sm-5 text-muted">Phòng ban:</dt>
+                                <dd class="col-sm-7">@(Model.PhongBan ?? "—")</dd>
+
+                                <dt class="col-sm-5 text-muted">Tên máy cài đặt:</dt>
+                                <dd class="col-sm-7 font-monospace fw-semibold">@(Model.May ?? "—")</dd>
+
+                                <dt class="col-sm-5 text-muted">Tài khoản User ID:</dt>
+                                <dd class="col-sm-7">
+                                    @if (user != null)
+                                    {
+                                        <a asp-controller="Users" asp-action="Details" asp-route-id="@user.Id" class="text-decoration-none">
+                                            @user.FullName (@user.Username)
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa liên kết</span>
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="fw-bold text-muted small text-uppercase mb-3">Thông tin Cài đặt</h6>
+                            <dl class="row mb-0">
+                                <dt class="col-sm-5 text-muted">Ngày cài đặt:</dt>
+                                <dd class="col-sm-7 font-monospace">@(Model.NgayCaiDat ?? "—")</dd>
+
+                                <dt class="col-sm-5 text-muted">Lý do sử dụng:</dt>
+                                <dd class="col-sm-7">@(Model.LyDo ?? "—")</dd>
+
+                                <dt class="col-sm-5 text-muted">Ghi chú:</dt>
+                                <dd class="col-sm-7 text-muted">@(Model.GhiChu ?? "Không có ghi chú")</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top py-3 text-end">
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-trash me-1"></i> Xóa phần mềm này
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+

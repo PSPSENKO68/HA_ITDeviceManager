@@ -1,0 +1,40 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Lỗi hệ thống";
+}
+
+<div class="card border-danger border-2 p-4 shadow-sm my-4">
+    <h2 class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Đã xảy ra lỗi khi xử lý yêu cầu</h2>
+    <hr />
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger">
+            <h5 class="fw-bold">Thông tin lỗi:</h5>
+            <p class="mb-0 font-monospace">@ViewBag.ErrorMessage</p>
+        </div>
+        @if (ViewBag.StackTrace != null)
+        {
+            <details class="mt-3">
+                <summary class="fw-semibold text-muted cursor-pointer">Chi tiết vết lỗi kỹ thuật (Stack Trace)</summary>
+                <pre class="bg-dark text-light p-3 rounded mt-2 small" style="white-space: pre-wrap;">@ViewBag.StackTrace</pre>
+            </details>
+        }
+    }
+
+    @if (Model.ShowRequestId)
+    {
+        <p class="text-muted small mt-2">
+            <strong>Mã Request ID:</strong> <code>@Model.RequestId</code>
+        </p>
+    }
+
+    <div class="mt-4">
+        <a href="javascript:history.back()" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại trang trước
+        </a>
+        <a asp-controller="ThietBi" asp-action="Index" class="btn btn-primary">
+            <i class="bi bi-house me-1"></i> Về trang chủ
+        </a>
+    </div>
+</div>

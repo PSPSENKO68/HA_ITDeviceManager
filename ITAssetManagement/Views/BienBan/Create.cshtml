@@ -1,0 +1,865 @@
+@model ITAssetManagement.Models.BienBanViewModel
+
+@{
+    ViewData["Title"] = "Lập Biên bản " + Model.LoaiBienBan;
+    var devices = ViewBag.Devices as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+    var users = ViewBag.Users as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold mb-0 text-primary">
+                        <i class="bi bi-file-earmark-diff me-2"></i>Lập Biên bản @Model.LoaiBienBan Tài sản CNTT
+                    </h5>
+                    <div class="text-muted small">Điền thông tin bàn giao, xem trước (Review) và xuất file Word chuẩn mẫu Hoàng Anh Group</div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        <i class="bi bi-arrow-left me-1"></i> Danh sách
+                    </a>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <form asp-action="Preview" method="post" id="bienBanForm">
+                    <!-- LOẠI BIÊN BẢN & SỐ BIÊN BẢN -->
+                    <div class="row g-3 mb-4 p-3 bg-light rounded-3 border">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Loại bàn giao <span class="text-danger">*</span></label>
+                            <div class="d-flex gap-3 mt-1">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" asp-for="LoaiBienBan" id="loaiCapPhat" value="Cấp phát" onchange="onLoaiChanged()">
+                                    <label class="form-check-label fw-semibold text-success" for="loaiCapPhat">
+                                        <i class="bi bi-check-circle me-1"></i> Cấp phát
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" asp-for="LoaiBienBan" id="loaiThuHoi" value="Thu hồi" onchange="onLoaiChanged()">
+                                    <label class="form-check-label fw-semibold text-danger" for="loaiThuHoi">
+                                        <i class="bi bi-arrow-down-circle me-1"></i> Thu hồi
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="SoBienBan" class="form-label fw-bold">
+                                Số biên bản (Mã duy nhất) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white font-monospace text-muted">#</span>
+                                <input asp-for="SoBienBan" class="form-control font-monospace fw-bold text-primary" id="soBienBanInput" required />
+                                <button type="button" class="btn btn-outline-secondary" onclick="generateNewSoBB()" title="Sinh mã mới">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
+                            </div>
+                            <div class="form-text small" style="font-size: 11px;">Mã tự động dạng YYMMDD.Timestamp</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="NgayBanGiao" class="form-label fw-bold">Ngày bàn giao <span class="text-danger">*</span></label>
+                            <input asp-for="NgayBanGiao" class="form-control form-control-sm" required placeholder="dd/MM/yyyy" />
+                        </div>
+                    </div>
+
+                    <!-- BÊN BÀN GIAO & BÊN NHẬN BÀN GIAO -->
+                    <div class="row g-4 mb-4">
+                        <!-- Cột Trái: Bên Bàn Giao -->
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 h-100 bg-white">
+                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                                    <h6 class="fw-bold text-dark mb-0">
+                                        <i class="bi bi-person-up me-2 text-primary"></i>BÊN BÀN GIAO
+                                    </h6>
+                                    <!-- Searchable Picker Button for NguoiGiao -->
+                                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-2 py-1 d-flex align-items-center gap-1"
+                                            id="btnPickerUserGiao" onclick="openUserPicker('giao')">
+                                        <i class="bi bi-search text-primary" style="font-size: 12px;"></i>
+                                        <span id="lblPickerUserGiao" style="font-size: 12px;">Chọn người giao</span>
+                                    </button>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="NguoiBanGiao" class="form-label small fw-semibold">Người bàn giao <span class="text-danger">*</span></label>
+                                    <input asp-for="NguoiBanGiao" class="form-control form-control-sm" id="nguoiGiaoInput" required />
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="ChucVu_BG" class="form-label small fw-semibold">Chức vụ</label>
+                                    <input asp-for="ChucVu_BG" class="form-control form-control-sm" id="chucVuGiaoInput" />
+                                </div>
+                                <div class="mb-0">
+                                    <label asp-for="BoPhan_BG" class="form-label small fw-semibold">Bộ phận / Phòng ban</label>
+                                    <input asp-for="BoPhan_BG" class="form-control form-control-sm" id="boPhanGiaoInput" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cột Phải: Bên Nhận Bàn Giao -->
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 h-100 bg-white">
+                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                                    <h6 class="fw-bold text-dark mb-0">
+                                        <i class="bi bi-person-down me-2 text-primary"></i>BÊN NHẬN BÀN GIAO
+                                    </h6>
+                                    <!-- Searchable Picker Button for NguoiNhan -->
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 d-flex align-items-center gap-1 shadow-xs"
+                                            id="btnPickerUserNhan" onclick="openUserPicker('nhan')">
+                                        <i class="bi bi-search" style="font-size: 12px;"></i>
+                                        <span id="lblPickerUserNhan" class="fw-semibold" style="font-size: 12px;">Tìm & Chọn nhân sự...</span>
+                                    </button>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="NguoiNhan" class="form-label small fw-semibold">Người nhận bàn giao <span class="text-danger">*</span></label>
+                                    <input asp-for="NguoiNhan" class="form-control form-control-sm" id="nguoiNhanInput" required />
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="ChucVu_Nhan" class="form-label small fw-semibold">Chức vụ</label>
+                                    <input asp-for="ChucVu_Nhan" class="form-control form-control-sm" id="chucVuNhanInput" />
+                                </div>
+                                <div class="mb-0">
+                                    <label asp-for="BoPhan_Nhan" class="form-label small fw-semibold">Bộ phận / Phòng ban</label>
+                                    <input asp-for="BoPhan_Nhan" class="form-control form-control-sm" id="boPhanNhanInput" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LÝ DO BÀN GIAO -->
+                    <div class="mb-4">
+                        <label asp-for="LyDoBanGiao" class="form-label fw-bold">Lý do bàn giao <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input asp-for="LyDoBanGiao" class="form-control" id="lyDoInput" required />
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">Gợi ý lý do</button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLyDo('Phục vụ cho công việc')">Phục vụ cho công việc (Cấp mới)</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLyDo('Đổi máy mới / Nâng cấp thiết bị')">Đổi máy mới / Nâng cấp</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLyDo('Nghỉ việc')">Nghỉ việc (Thu hồi)</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLyDo('Điều chuyển bộ phận công tác')">Điều chuyển công tác</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="setLyDo('Hết thời hạn sử dụng / Thu hồi bảo trì')">Hết thời hạn sử dụng</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- THIẾT BỊ BÀN GIAO -->
+                    <div class="card border mb-4 rounded-3 shadow-2xs">
+                        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <span class="fw-bold text-dark"><i class="bi bi-laptop me-2 text-primary"></i>Thông tin Thiết bị bàn giao</span>
+                            <!-- Searchable Picker Button for Device -->
+                            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 d-flex align-items-center gap-1 shadow-xs"
+                                    id="btnPickerDevice" onclick="openDevicePicker()">
+                                <i class="bi bi-search" style="font-size: 12px;"></i>
+                                <span id="lblPickerDevice" class="fw-semibold" style="font-size: 12px;">Tìm kiếm thiết bị trong kho / danh mục...</span>
+                            </button>
+                        </div>
+                        <div class="card-body p-3">
+                            <input type="hidden" asp-for="ThietBiId" id="thietBiIdInput" />
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="TenThietBi" class="form-label small fw-semibold">Tên tài sản / Model máy tính <span class="text-danger">*</span></label>
+                                    <input asp-for="TenThietBi" class="form-control" id="tenThietBiInput" required />
+                                </div>
+                                <div class="col-md-3">
+                                    <label asp-for="SerialNumber" class="form-label small fw-semibold">Serial Number</label>
+                                    <input asp-for="SerialNumber" class="form-control font-monospace" id="serialInput" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label asp-for="ThoiGianCap" class="form-label small fw-semibold">Thời gian cấp / thu hồi</label>
+                                    <input asp-for="ThoiGianCap" class="form-control font-monospace" id="thoiGianCapInput" placeholder="MM/yyyy" />
+                                </div>
+                                <div class="col-md-12">
+                                    <label asp-for="DacTinhKyThuat" class="form-label small fw-semibold">Đặc tính kỹ thuật (RAM, CPU, Ổ cứng SSD/HDD...)</label>
+                                    <textarea asp-for="DacTinhKyThuat" class="form-control font-monospace small" id="dacTinhInput" rows="3" placeholder="RAM 8GB&#10;Bộ nhớ 250GB SSD&#10;Intel Core i3-1005G1"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PHẦN MỀM & QUYỀN TRUY CẬP -->
+                    <div class="card border mb-4 rounded-3 shadow-2xs">
+                        <div class="card-header bg-light py-2">
+                            <span class="fw-bold text-dark"><i class="bi bi-app-indicator me-2 text-primary"></i>Phần mềm, Tài khoản & Quyền ERP</span>
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Email_M365" class="form-label small fw-semibold">Email Microsoft Office 365 <span class="text-danger">*</span></label>
+                                    <input asp-for="Email_M365" class="form-control" id="emailInput" required placeholder="user@hoanganh.com.vn" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="Domain_Name" class="form-label small fw-semibold">Tên Domain (Tài khoản Windows / ERP) <span class="text-danger">*</span></label>
+                                    <input asp-for="Domain_Name" class="form-control font-monospace" id="domainInput" required placeholder="USER.NAME" />
+                                </div>
+                            </div>
+
+                            <!-- Mục dành cho Sales Project (Đặc biệt) -->
+                            <div class="p-3 mb-3 bg-light rounded-3 border">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" asp-for="HasSalesProject" id="hasSalesCheck" onchange="toggleSalesInput()">
+                                    <label class="form-check-label fw-semibold text-primary" for="hasSalesCheck">
+                                        <i class="bi bi-star-fill text-warning me-1"></i> Có tài khoản Sales Project (Dành cho bộ phận Sales)
+                                    </label>
+                                </div>
+                                <div id="salesProjectBox" style="display: @(Model.HasSalesProject ? "block" : "none");">
+                                    <label asp-for="Email_Sales" class="form-label small fw-semibold">Email Sales Project:</label>
+                                    <input asp-for="Email_Sales" class="form-control form-control-sm" id="emailSalesInput" placeholder="thao.mait@hoanganh.com.vn..." />
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label asp-for="MucTruyCap_ERP" class="form-label small fw-semibold mb-0">Các mục trong ERP mà user được cấp quyền truy cập:</label>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-link text-decoration-none py-0" type="button" data-bs-toggle="dropdown">+ Thêm mục nhanh</button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                            <li><a class="dropdown-item small" href="javascript:void(0)" onclick="addErpItem('Khai báo vật tư, hàng hóa, dịch vụ')">Khai báo vật tư, hàng hóa, dịch vụ</a></li>
+                                            <li><a class="dropdown-item small" href="javascript:void(0)" onclick="addErpItem('Phân hệ quản lý sản xuất (MFG)')">Phân hệ quản lý sản xuất (MFG)</a></li>
+                                            <li><a class="dropdown-item small" href="javascript:void(0)" onclick="addErpItem('Change Password')">Change Password</a></li>
+                                            <li><a class="dropdown-item small" href="javascript:void(0)" onclick="addErpItem('PR Internal & Payment Request - Sales')">PR Internal & Payment Request - Sales</a></li>
+                                            <li><a class="dropdown-item small" href="javascript:void(0)" onclick="addErpItem('Phân hệ Bán hàng & Công nợ (AR)')">Phân hệ Bán hàng & Công nợ (AR)</a></li>
+                                            <li><a class="dropdown-item small" href="javascript:void(0)" onclick="addErpItem('Phân hệ Mua hàng & Kho (PO & INV)')">Phân hệ Mua hàng & Kho (PO & INV)</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <textarea asp-for="MucTruyCap_ERP" class="form-control font-monospace small" id="erpInput" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nút thao tác -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a asp-action="Index" class="btn btn-light border px-4">Hủy</a>
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold shadow-xs">
+                            <i class="bi bi-eye me-1"></i> Xem trước biên bản (Review trước khi xuất)
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     SEARCHABLE MODAL: CHỌN NHÂN SỰ (USER PICKER)
+     ============================================================ -->
+<div class="modal fade" id="userPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg border-0" style="border-radius: var(--radius-lg); overflow: hidden;">
+            <div class="modal-header bg-white py-3 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="stat-icon blue" style="width: 36px; height: 36px; font-size: 16px;">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title fw-bold text-dark mb-0" id="userPickerModalTitle">Chọn Nhân sự bàn giao</h6>
+                        <small class="text-muted" id="userPickerModalSub">Gõ để tìm nhanh theo Họ tên, Chức vụ, Email hoặc Phòng ban</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Search Bar in Modal -->
+            <div class="p-3 border-bottom bg-light">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="userSearchModalInput" class="form-control border-start-0 ps-0" 
+                           placeholder="🔍 Gõ tìm kiếm... (vd: Phong, Duy, Huỳnh, Sales, Marketing...)" autocomplete="off" autofocus />
+                    <button class="btn btn-outline-secondary" type="button" onclick="clearUserSearch()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2 px-1">
+                    <small class="text-muted" id="userMatchCountText">Đang hiển thị toàn bộ nhân sự</small>
+                    <small class="text-muted fst-italic">Hỗ trợ tìm tiếng Việt có dấu và không dấu</small>
+                </div>
+            </div>
+
+            <!-- Scrollable User Cards -->
+            <div class="modal-body p-3" style="max-height: 420px; overflow-y: auto;">
+                <div class="row g-2" id="userCardsContainer">
+                    @foreach (var u in users)
+                    {
+                        string fullname = u.FullName ?? "";
+                        string dept = u.Department ?? "";
+                        string pos = u.Position ?? "Nhân viên";
+                        string email = u.Email ?? "";
+                        string username = u.Username ?? "";
+                        string initial = !string.IsNullOrEmpty(fullname) ? fullname.Substring(0, 1).ToUpper() : "U";
+
+                        <div class="col-md-6 user-picker-item" 
+                             data-id="@u.Id"
+                             data-fullname="@fullname"
+                             data-dept="@dept"
+                             data-position="@pos"
+                             data-email="@email"
+                             data-username="@username"
+                             data-search="@(fullname + " " + dept + " " + pos + " " + email + " " + username)">
+                            <div class="p-3 border rounded-3 bg-white h-100 d-flex align-items-center gap-3 user-item-card"
+                                 onclick="selectUserFromModal('@u.Id')"
+                                 style="cursor: pointer; transition: all 0.15s ease;">
+                                <div class="user-avatar-circle flex-shrink-0" 
+                                     style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--brand-orange-dark) 0%, var(--brand-orange-light) 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px;">
+                                    @initial
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="fw-bold text-dark text-truncate" style="font-size: 14px;">@fullname</div>
+                                    <div class="d-flex align-items-center gap-1 my-1 flex-wrap">
+                                        <span class="badge bg-light text-secondary border small" style="font-size: 11px;">@dept</span>
+                                        <span class="badge bg-light text-dark border small" style="font-size: 11px;">@pos</span>
+                                    </div>
+                                    <div class="small text-muted text-truncate" style="font-size: 12px;">
+                                        <i class="bi bi-envelope me-1"></i>@(string.IsNullOrEmpty(email) ? username : email)
+                                    </div>
+                                </div>
+                                <div class="text-primary flex-shrink-0 opacity-0 select-icon">
+                                    <i class="bi bi-check-circle-fill fs-5"></i>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     SEARCHABLE MODAL: CHỌN THIẾT BỊ (DEVICE PICKER)
+     ============================================================ -->
+<div class="modal fade" id="devicePickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content shadow-lg border-0" style="border-radius: var(--radius-lg); overflow: hidden;">
+            <div class="modal-header bg-white py-3 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="stat-icon green" style="width: 36px; height: 36px; font-size: 16px;">
+                        <i class="bi bi-laptop-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title fw-bold text-dark mb-0">Chọn Thiết bị trong kho / Danh mục</h6>
+                        <small class="text-muted">Tìm kiếm tức thì theo Model máy, Serial Number, Cấu hình hoặc Người đang giữ</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Search Bar & Filters in Device Modal -->
+            <div class="p-3 border-bottom bg-light">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-7">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" id="deviceSearchModalInput" class="form-control border-start-0 ps-0" 
+                                   placeholder="🔍 Gõ Model, Serial, Cấu hình, Người giữ (vd: Probook, Latitude, 5CD..., Kho IT)..." 
+                                   autocomplete="off" autofocus />
+                            <button class="btn btn-outline-secondary" type="button" onclick="clearDeviceSearch()">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-5 d-flex justify-content-md-end gap-1 flex-wrap">
+                        <button type="button" class="btn btn-sm btn-outline-secondary active filter-dev-btn" onclick="filterDeviceCategory('all', this)">Tất cả</button>
+                        <button type="button" class="btn btn-sm btn-outline-success filter-dev-btn" onclick="filterDeviceCategory('kho', this)">
+                            <i class="bi bi-box-seam me-1"></i>Kho IT
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary filter-dev-btn" onclick="filterDeviceCategory('maytinh', this)">Máy tính / Laptop</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary filter-dev-btn" onclick="filterDeviceCategory('mayin', this)">Máy in</button>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2 px-1">
+                    <small class="text-muted" id="deviceMatchCountText">Đang hiển thị toàn bộ thiết bị</small>
+                    <small class="text-muted fst-italic">Nhấp vào thiết bị để tự động điền cấu hình vào biên bản</small>
+                </div>
+            </div>
+
+            <!-- Scrollable Device Cards -->
+            <div class="modal-body p-3" style="max-height: 460px; overflow-y: auto;">
+                <div class="row g-2" id="deviceCardsContainer">
+                    @foreach (var d in devices)
+                    {
+                        string modelName = d.Model ?? "Thiết bị IT";
+                        string serial = d.SerialNumber ?? "";
+                        string owner = d.Owner ?? "Kho IT";
+                        string dept = d.PhongBan ?? "";
+                        string cpu = d.Cpu ?? "";
+                        string ram = d.Ram ?? "";
+                        string disk = d.HardDisk ?? "";
+                        string thoigian = d.ThoiGianDauTu ?? DateTime.Today.ToString("MM/yyyy");
+                        string nhom = d.NhomThietBi ?? "Máy tính";
+                        bool isKhoIT = string.IsNullOrEmpty(d.Owner) || d.Owner == "Kho IT";
+
+                        string iconClass = "bi-laptop";
+                        if (nhom.Contains("Máy in") || modelName.ToLower().Contains("canon") || modelName.ToLower().Contains("brother"))
+                        {
+                            iconClass = "bi-printer";
+                        }
+                        else if (nhom.Contains("Mạng") || modelName.ToLower().Contains("ap") || modelName.ToLower().Contains("switch"))
+                        {
+                            iconClass = "bi-router";
+                        }
+                        else if (modelName.ToLower().Contains("pc") || modelName.ToLower().Contains("desktop"))
+                        {
+                            iconClass = "bi-pc-display";
+                        }
+
+                        <div class="col-md-6 device-picker-item" 
+                             data-id="@d.Id"
+                             data-model="@modelName"
+                             data-serial="@serial"
+                             data-cpu="@cpu"
+                             data-ram="@ram"
+                             data-disk="@disk"
+                             data-thoigian="@thoigian"
+                             data-owner="@owner"
+                             data-dept="@dept"
+                             data-nhom="@nhom"
+                             data-is-kho="@(isKhoIT ? "true" : "false")"
+                             data-search="@(modelName + " " + serial + " " + owner + " " + dept + " " + cpu + " " + ram + " " + disk + " " + nhom)">
+                            
+                            <div class="p-3 border rounded-3 bg-white h-100 d-flex align-items-start gap-3 device-item-card"
+                                 onclick="selectDeviceFromModal('@d.Id')"
+                                 style="cursor: pointer; transition: all 0.15s ease;">
+                                <div class="stat-icon @(isKhoIT ? "green" : "blue") flex-shrink-0" style="width: 40px; height: 40px; font-size: 18px; border-radius: 10px;">
+                                    <i class="bi @iconClass"></i>
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="d-flex justify-content-between align-items-start gap-1">
+                                        <div class="fw-bold text-dark text-truncate" style="font-size: 14px;" title="@modelName">
+                                            @modelName
+                                        </div>
+                                        @if (isKhoIT)
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle flex-shrink-0" style="font-size: 11px;">
+                                                <i class="bi bi-box-seam me-1"></i>Kho IT
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-secondary border flex-shrink-0" style="font-size: 11px;">
+                                                @owner
+                                            </span>
+                                        }
+                                    </div>
+                                    <div class="my-1">
+                                        @if (!string.IsNullOrEmpty(serial))
+                                        {
+                                            <span class="badge bg-light text-dark font-monospace border small" style="font-size: 11.5px;">SN: @serial</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(dept))
+                                        {
+                                            <span class="badge bg-light text-secondary border small" style="font-size: 11px;">@dept</span>
+                                        }
+                                    </div>
+                                    <div class="small text-muted text-truncate font-monospace" style="font-size: 11.5px;">
+                                        @(string.Join(" • ", new[] { !string.IsNullOrEmpty(ram) ? "RAM " + ram : "", !string.IsNullOrEmpty(disk) ? "SSD " + disk : "", cpu }.Where(s => !string.IsNullOrEmpty(s))))
+                                    </div>
+                                </div>
+                                <div class="text-primary flex-shrink-0 opacity-0 select-icon align-self-center">
+                                    <i class="bi bi-check-circle-fill fs-5"></i>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .user-item-card:hover, .device-item-card:hover {
+        border-color: var(--color-primary) !important;
+        background-color: var(--color-primary-light) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .user-item-card:hover .select-icon, .device-item-card:hover .select-icon {
+        opacity: 1 !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        let currentTargetUser = 'nhan'; // 'giao' hoặc 'nhan'
+        let currentDeviceFilterCat = 'all';
+
+        // Hàm gỡ dấu tiếng Việt để tìm kiếm không phụ thuộc dấu
+        function removeVietnameseTones(str) {
+            if (!str) return '';
+            str = str.toLowerCase();
+            str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            str = str.replace(/[đĐ]/g, 'd');
+            return str.trim();
+        }
+
+        // ==========================================
+        // USER PICKER FUNCTIONS
+        // ==========================================
+        function openUserPicker(target) {
+            currentTargetUser = target;
+            const modalTitle = document.getElementById('userPickerModalTitle');
+            const modalSub = document.getElementById('userPickerModalSub');
+            const isThuHoi = document.getElementById("loaiThuHoi").checked;
+            
+            if (target === 'giao') {
+                if (isThuHoi) {
+                    modalTitle.innerText = 'Chọn Người bàn giao (Nhân sự nghỉ việc / trả máy)';
+                    modalSub.innerText = 'Tự động điền Họ tên, Chức vụ, Bộ phận, Email và Domain ERP thu hồi';
+                } else {
+                    modalTitle.innerText = 'Chọn Người bàn giao (IT Cấp phát)';
+                    modalSub.innerText = 'Chọn cán bộ IT phụ trách cấp phát thiết bị';
+                }
+            } else {
+                if (isThuHoi) {
+                    modalTitle.innerText = 'Chọn Người nhận bàn giao (IT Tiếp nhận)';
+                    modalSub.innerText = 'Chọn cán bộ IT tiếp nhận lại tài sản và tài khoản';
+                } else {
+                    modalTitle.innerText = 'Chọn Người nhận bàn giao (Nhân sự mới nhận máy)';
+                    modalSub.innerText = 'Tự động điền Họ tên, Chức vụ, Bộ phận, Email và Domain ERP cấp phát';
+                }
+            }
+
+            const modalEl = document.getElementById('userPickerModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+
+            setTimeout(() => {
+                const searchInput = document.getElementById('userSearchModalInput');
+                searchInput.value = '';
+                filterUserCards('');
+                searchInput.focus();
+            }, 300);
+        }
+
+        document.getElementById('userSearchModalInput').addEventListener('input', function() {
+            filterUserCards(this.value);
+        });
+
+        function clearUserSearch() {
+            const input = document.getElementById('userSearchModalInput');
+            input.value = '';
+            filterUserCards('');
+            input.focus();
+        }
+
+        function filterUserCards(keyword) {
+            const cleanKey = removeVietnameseTones(keyword);
+            const items = document.querySelectorAll('.user-picker-item');
+            let matchCount = 0;
+
+            items.forEach(item => {
+                const searchData = removeVietnameseTones(item.getAttribute('data-search'));
+                if (!cleanKey || searchData.includes(cleanKey)) {
+                    item.style.display = '';
+                    matchCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            const countText = document.getElementById('userMatchCountText');
+            if (cleanKey) {
+                countText.innerText = `Tìm thấy ${matchCount} nhân sự phù hợp với "${keyword}"`;
+            } else {
+                countText.innerText = `Đang hiển thị toàn bộ ${items.length} nhân sự`;
+            }
+        }
+
+        function selectUserFromModal(userId) {
+            const item = document.querySelector(`.user-picker-item[data-id="${userId}"]`);
+            if (!item) return;
+
+            const fullname = item.getAttribute('data-fullname');
+            const dept = item.getAttribute('data-dept');
+            const pos = item.getAttribute('data-position');
+            const email = item.getAttribute('data-email');
+            const username = item.getAttribute('data-username');
+            const isThuHoi = document.getElementById("loaiThuHoi").checked;
+
+            if (currentTargetUser === 'giao') {
+                document.getElementById('nguoiGiaoInput').value = fullname;
+                document.getElementById('chucVuGiaoInput').value = pos;
+                document.getElementById('boPhanGiaoInput').value = dept;
+                document.getElementById('lblPickerUserGiao').innerText = '✓ ' + fullname;
+
+                // Trong biên bản Thu hồi: Người bàn giao là nhân viên -> Tự động nhảy Email & Domain
+                if (isThuHoi || !document.getElementById('emailInput').value || document.getElementById('emailInput').value.includes('user@hoanganh')) {
+                    if (email) document.getElementById('emailInput').value = email;
+                    if (username) document.getElementById('domainInput').value = username.toUpperCase();
+                }
+            } else {
+                document.getElementById('nguoiNhanInput').value = fullname;
+                document.getElementById('chucVuNhanInput').value = pos;
+                document.getElementById('boPhanNhanInput').value = dept;
+                document.getElementById('lblPickerUserNhan').innerText = '✓ ' + fullname;
+
+                // Trong biên bản Cấp phát: Người nhận là nhân viên mới -> Tự động nhảy Email & Domain
+                if (!isThuHoi || !document.getElementById('emailInput').value || document.getElementById('emailInput').value.includes('user@hoanganh')) {
+                    if (email) document.getElementById('emailInput').value = email;
+                    if (username) document.getElementById('domainInput').value = username.toUpperCase();
+                }
+            }
+
+            // Đóng modal
+            const modalEl = document.getElementById('userPickerModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+
+        // ==========================================
+        // DEVICE PICKER FUNCTIONS
+        // ==========================================
+        function openDevicePicker() {
+            const modalEl = document.getElementById('devicePickerModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+
+            setTimeout(() => {
+                const searchInput = document.getElementById('deviceSearchModalInput');
+                searchInput.value = '';
+                filterDeviceCards();
+                searchInput.focus();
+            }, 300);
+        }
+
+        document.getElementById('deviceSearchModalInput').addEventListener('input', function() {
+            filterDeviceCards();
+        });
+
+        function clearDeviceSearch() {
+            const input = document.getElementById('deviceSearchModalInput');
+            input.value = '';
+            filterDeviceCards();
+            input.focus();
+        }
+
+        function filterDeviceCategory(cat, btn) {
+            currentDeviceFilterCat = cat;
+            document.querySelectorAll('.filter-dev-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            filterDeviceCards();
+        }
+
+        function filterDeviceCards() {
+            const keyword = document.getElementById('deviceSearchModalInput').value;
+            const cleanKey = removeVietnameseTones(keyword);
+            const items = document.querySelectorAll('.device-picker-item');
+            let matchCount = 0;
+
+            items.forEach(item => {
+                const searchData = removeVietnameseTones(item.getAttribute('data-search'));
+                const isKho = item.getAttribute('data-is-kho') === 'true';
+                const nhom = removeVietnameseTones(item.getAttribute('data-nhom'));
+                const model = removeVietnameseTones(item.getAttribute('data-model'));
+
+                let matchesCat = true;
+                if (currentDeviceFilterCat === 'kho') {
+                    matchesCat = isKho;
+                } else if (currentDeviceFilterCat === 'maytinh') {
+                    matchesCat = nhom.includes('may tinh') || model.includes('probook') || model.includes('latitude') || model.includes('dell') || model.includes('hp');
+                } else if (currentDeviceFilterCat === 'mayin') {
+                    matchesCat = nhom.includes('may in') || model.includes('canon') || model.includes('brother') || model.includes('lbp');
+                }
+
+                const matchesText = !cleanKey || searchData.includes(cleanKey);
+
+                if (matchesCat && matchesText) {
+                    item.style.display = '';
+                    matchCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            const countText = document.getElementById('deviceMatchCountText');
+            countText.innerText = `Tìm thấy ${matchCount} thiết bị phù hợp`;
+        }
+
+        function selectDeviceFromModal(deviceId) {
+            const item = document.querySelector(`.device-picker-item[data-id="${deviceId}"]`);
+            if (!item) return;
+
+            const model = item.getAttribute('data-model');
+            const serial = item.getAttribute('data-serial');
+            const cpu = item.getAttribute('data-cpu');
+            const ram = item.getAttribute('data-ram');
+            const disk = item.getAttribute('data-disk');
+            const thoigian = item.getAttribute('data-thoigian');
+            const owner = item.getAttribute('data-owner');
+            const dept = item.getAttribute('data-dept');
+            const isThuHoi = document.getElementById("loaiThuHoi").checked;
+
+            document.getElementById('thietBiIdInput').value = deviceId;
+            document.getElementById('tenThietBiInput').value = model;
+            document.getElementById('serialInput').value = serial;
+            document.getElementById('thoiGianCapInput').value = thoigian;
+
+            const specs = [];
+            if (ram) specs.push('RAM ' + ram);
+            if (disk) specs.push('Bộ nhớ ' + disk);
+            if (cpu) specs.push(cpu);
+            document.getElementById('dacTinhInput').value = specs.join('\n');
+
+            document.getElementById('lblPickerDevice').innerText = '✓ ' + model + (serial ? ' (' + serial + ')' : '');
+
+            // Nếu đang ở biên bản Thu hồi và thiết bị có người đang giữ (không phải Kho IT)
+            if (isThuHoi && owner && owner !== 'Kho IT') {
+                document.getElementById('nguoiGiaoInput').value = owner;
+                if (dept) document.getElementById('boPhanGiaoInput').value = dept;
+                document.getElementById('lblPickerUserGiao').innerText = '✓ ' + owner;
+
+                // Tự động tìm user trong danh mục user modal để điền Chức vụ, Email và Domain
+                const cleanOwner = removeVietnameseTones(owner);
+                const userCards = document.querySelectorAll('.user-picker-item');
+                for (let card of userCards) {
+                    if (removeVietnameseTones(card.getAttribute('data-fullname')) === cleanOwner) {
+                        const pos = card.getAttribute('data-position');
+                        const email = card.getAttribute('data-email');
+                        const username = card.getAttribute('data-username');
+                        if (pos) document.getElementById('chucVuGiaoInput').value = pos;
+                        if (email) document.getElementById('emailInput').value = email;
+                        if (username) document.getElementById('domainInput').value = username.toUpperCase();
+                        break;
+                    }
+                }
+            }
+
+            // Đóng modal
+            const modalEl = document.getElementById('devicePickerModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+
+        // ==========================================
+        // OTHER FORM UTILITIES
+        // ==========================================
+        function generateNewSoBB() {
+            var now = new Date();
+            var yy = String(now.getFullYear()).slice(-2);
+            var mm = String(now.getMonth() + 1).padStart(2, '0');
+            var dd = String(now.getDate()).padStart(2, '0');
+            var hh = String(now.getHours()).padStart(2, '0');
+            var min = String(now.getMinutes()).padStart(2, '0');
+            var ss = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById("soBienBanInput").value = yy + mm + dd + "." + hh + min + ss;
+        }
+
+        function setLyDo(text) {
+            document.getElementById("lyDoInput").value = text;
+        }
+
+        function toggleSalesInput() {
+            var check = document.getElementById("hasSalesCheck");
+            var box = document.getElementById("salesProjectBox");
+            box.style.display = check.checked ? "block" : "none";
+            if (check.checked && !document.getElementById("emailSalesInput").value) {
+                document.getElementById("emailSalesInput").value = document.getElementById("emailInput").value;
+            }
+        }
+
+        function addErpItem(item) {
+            var ta = document.getElementById("erpInput");
+            var lines = ta.value.split('\n').filter(l => l.trim().length > 0);
+            var nextNum = lines.length + 1;
+            lines.push(nextNum + ". " + item);
+            ta.value = lines.join('\n');
+        }
+
+        function updatePickerButtonStyles() {
+            var isThuHoi = document.getElementById("loaiThuHoi").checked;
+            var btnGiao = document.getElementById("btnPickerUserGiao");
+            var lblGiao = document.getElementById("lblPickerUserGiao");
+            var btnNhan = document.getElementById("btnPickerUserNhan");
+            var lblNhan = document.getElementById("lblPickerUserNhan");
+
+            if (isThuHoi) {
+                // Thu hồi: Bên giao là nhân viên (nổi bật để chọn), Bên nhận là IT
+                btnGiao.className = "btn btn-outline-danger btn-sm rounded-pill px-3 py-1 d-flex align-items-center gap-1 shadow-xs";
+                if (!lblGiao.innerText.startsWith('✓')) {
+                    lblGiao.innerText = "Tìm & Chọn nhân sự trả máy...";
+                    lblGiao.className = "fw-semibold";
+                }
+                btnNhan.className = "btn btn-outline-secondary btn-sm rounded-pill px-2 py-1 d-flex align-items-center gap-1";
+                if (!lblNhan.innerText.startsWith('✓')) {
+                    lblNhan.innerText = "Chọn người nhận (IT)";
+                    lblNhan.className = "";
+                }
+            } else {
+                // Cấp phát: Bên giao là IT, Bên nhận là nhân viên (nổi bật để chọn)
+                btnGiao.className = "btn btn-outline-secondary btn-sm rounded-pill px-2 py-1 d-flex align-items-center gap-1";
+                if (!lblGiao.innerText.startsWith('✓')) {
+                    lblGiao.innerText = "Chọn người giao (IT)";
+                    lblGiao.className = "";
+                }
+                btnNhan.className = "btn btn-outline-primary btn-sm rounded-pill px-3 py-1 d-flex align-items-center gap-1 shadow-xs";
+                if (!lblNhan.innerText.startsWith('✓')) {
+                    lblNhan.innerText = "Tìm & Chọn nhân sự nhận máy...";
+                    lblNhan.className = "fw-semibold";
+                }
+            }
+        }
+
+        function onLoaiChanged() {
+            var isThuHoi = document.getElementById("loaiThuHoi").checked;
+            if (isThuHoi) {
+                document.getElementById("lyDoInput").value = "Nghỉ việc";
+                
+                // Mặc định bên nhận là IT Helpdesk
+                if (!document.getElementById('nguoiNhanInput').value || document.getElementById('nguoiNhanInput').value === 'Nguyễn Hoàng Khánh Duy') {
+                    document.getElementById('nguoiNhanInput').value = "Nguyễn Hoàng Khánh Duy";
+                    document.getElementById('chucVuNhanInput').value = "IT Helpdesk";
+                    document.getElementById('boPhanNhanInput').value = "IT";
+                    document.getElementById('lblPickerUserNhan').innerText = "✓ Nguyễn Hoàng Khánh Duy";
+                }
+
+                // Nếu bên giao đã có người, tự động tìm và cập nhật Email/Domain của người đó
+                var nguoiGiao = document.getElementById('nguoiGiaoInput').value;
+                if (nguoiGiao && nguoiGiao !== 'Nguyễn Hoàng Khánh Duy') {
+                    const cleanGiao = removeVietnameseTones(nguoiGiao);
+                    const userCards = document.querySelectorAll('.user-picker-item');
+                    for (let card of userCards) {
+                        if (removeVietnameseTones(card.getAttribute('data-fullname')) === cleanGiao) {
+                            const email = card.getAttribute('data-email');
+                            const username = card.getAttribute('data-username');
+                            if (email) document.getElementById('emailInput').value = email;
+                            if (username) document.getElementById('domainInput').value = username.toUpperCase();
+                            break;
+                        }
+                    }
+                }
+            } else {
+                document.getElementById("lyDoInput").value = "Phục vụ cho công việc";
+                
+                // Mặc định bên giao là IT Helpdesk
+                if (!document.getElementById('nguoiGiaoInput').value || document.getElementById('nguoiGiaoInput').value === 'Nguyễn Hoàng Khánh Duy') {
+                    document.getElementById('nguoiGiaoInput').value = "Nguyễn Hoàng Khánh Duy";
+                    document.getElementById('chucVuGiaoInput').value = "IT Helpdesk";
+                    document.getElementById('boPhanGiaoInput').value = "IT";
+                    document.getElementById('lblPickerUserGiao').innerText = "✓ Nguyễn Hoàng Khánh Duy";
+                }
+
+                // Nếu bên nhận đã có người, tự động tìm và cập nhật Email/Domain của người đó
+                var nguoiNhan = document.getElementById('nguoiNhanInput').value;
+                if (nguoiNhan && nguoiNhan !== 'Nguyễn Hoàng Khánh Duy') {
+                    const cleanNhan = removeVietnameseTones(nguoiNhan);
+                    const userCards = document.querySelectorAll('.user-picker-item');
+                    for (let card of userCards) {
+                        if (removeVietnameseTones(card.getAttribute('data-fullname')) === cleanNhan) {
+                            const email = card.getAttribute('data-email');
+                            const username = card.getAttribute('data-username');
+                            if (email) document.getElementById('emailInput').value = email;
+                            if (username) document.getElementById('domainInput').value = username.toUpperCase();
+                            break;
+                        }
+                    }
+                }
+            }
+            updatePickerButtonStyles();
+        }
+
+        // Tự động khởi tạo giao diện nút bấm theo loại biên bản ban đầu
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePickerButtonStyles();
+        });
+    </script>
+}

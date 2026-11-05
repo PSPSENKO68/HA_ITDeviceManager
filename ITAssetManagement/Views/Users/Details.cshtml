@@ -1,0 +1,236 @@
+@model ITAssetManagement.Models.User
+
+@{
+    ViewData["Title"] = "Hồ sơ Tài sản Nhân sự - " + Model.FullName;
+    var devices = ViewBag.Devices as List<ITAssetManagement.Models.ThietBi> ?? new List<ITAssetManagement.Models.ThietBi>();
+    var licenses = ViewBag.Licenses as List<ITAssetManagement.Models.License> ?? new List<ITAssetManagement.Models.License>();
+    var apps = ViewBag.Apps as List<ITAssetManagement.Models.ApplicationSoftware> ?? new List<ITAssetManagement.Models.ApplicationSoftware>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1"><i class="bi bi-person-badge me-2 text-primary"></i>Hồ sơ Nhân sự & Tài sản IT</h2>
+        <p class="text-muted mb-0">Xem toàn bộ thông tin nhân sự và thiết bị, bản quyền phần mềm đang được cấp phát</p>
+    </div>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary btn-sm me-1">
+            <i class="bi bi-pencil me-1"></i> Chỉnh sửa
+        </a>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- User Info Card -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body text-center p-4">
+                <div class="avatar bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" 
+                     style="width: 72px; height: 72px; font-size: 2rem; font-weight: bold;">
+                    @(Model.FullName.Length > 0 ? Model.FullName.Substring(0, 1).ToUpper() : "U")
+                </div>
+                <h4 class="fw-bold text-dark mb-1">@Model.FullName</h4>
+                <div class="text-muted small mb-2"><i class="bi bi-person me-1"></i>@Model.Username</div>
+                <div>
+                    @if (Model.Role == "Admin")
+                    {
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1"><i class="bi bi-shield-lock me-1"></i>Admin</span>
+                    }
+                    else if (Model.Role == "IT Support")
+                    {
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1"><i class="bi bi-headset me-1"></i>IT Support</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary-subtle text-secondary border px-3 py-1">@(Model.Role ?? "User")</span>
+                    }
+                </div>
+            </div>
+            <div class="card-footer bg-light p-3 border-top">
+                <dl class="row mb-0 small">
+                    <dt class="col-sm-5 text-muted">Email:</dt>
+                    <dd class="col-sm-7"><a href="mailto:@Model.Email" class="text-decoration-none">@(Model.Email ?? "—")</a></dd>
+
+                    <dt class="col-sm-5 text-muted">Phòng ban:</dt>
+                    <dd class="col-sm-7 fw-semibold">@(Model.Department ?? "—")</dd>
+
+                    <dt class="col-sm-5 text-muted">Chức danh:</dt>
+                    <dd class="col-sm-7">@(Model.Position ?? "—")</dd>
+
+                    <dt class="col-sm-5 text-muted">Khối làm việc:</dt>
+                    <dd class="col-sm-7">@(Model.Block ?? "—")</dd>
+
+                    <dt class="col-sm-5 text-muted">Trạng thái:</dt>
+                    <dd class="col-sm-7">
+                        @if (Model.IsActive == true)
+                        {
+                            <span class="badge bg-success-subtle text-success">Đang hoạt động</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary-subtle text-secondary">Đã khóa</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-5 text-muted">Ngày tạo:</dt>
+                    <dd class="col-sm-7 text-muted font-monospace">@(Model.CreatedAt?.ToString("MM/dd/yyyy") ?? "—")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connected IT Assets Tab -->
+    <div class="col-lg-8">
+        <!-- 1. Thiết bị đang sử dụng -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-laptop me-2 text-primary"></i>Thiết bị IT đang bàn giao (@devices.Count)
+                </h6>
+                <a asp-controller="ThietBi" asp-action="Create" asp-route-owner="@Model.FullName" asp-route-phongBan="@Model.Department" class="btn btn-outline-primary btn-sm py-0">
+                    <i class="bi bi-plus-lg me-1"></i> Gán thiết bị
+                </a>
+            </div>
+            <div class="card-body p-0">
+                @if (!devices.Any())
+                {
+                    <div class="p-3 text-muted text-center small">Chưa có thiết bị nào được gán cho nhân sự này.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light text-muted">
+                                <tr>
+                                    <th class="ps-3">Nhóm</th>
+                                    <th>Model thiết bị</th>
+                                    <th>Serial Number</th>
+                                    <th>IP Address</th>
+                                    <th>Hiện trạng</th>
+                                    <th class="text-end pe-3">Xem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var dev in devices)
+                                {
+                                    <tr>
+                                        <td class="ps-3"><span class="badge bg-light text-dark border">@dev.NhomThietBi</span></td>
+                                        <td class="fw-semibold text-dark">@dev.Model</td>
+                                        <td class="font-monospace">@dev.SerialNumber</td>
+                                        <td class="font-monospace">@(dev.Ipaddress ?? "—")</td>
+                                        <td><span class="badge bg-success-subtle text-success">@(dev.HienTrang ?? "Đang dùng")</span></td>
+                                        <td class="text-end pe-3">
+                                            <a asp-controller="ThietBi" asp-action="Details" asp-route-id="@dev.Id" class="btn btn-sm btn-outline-info py-0 px-2"><i class="bi bi-eye"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- 2. Bản quyền / License được cấp -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-key me-2 text-primary"></i>Bản quyền / License (@licenses.Count)
+                </h6>
+                <a asp-controller="License" asp-action="Create" asp-route-userId="@Model.Id" class="btn btn-outline-primary btn-sm py-0">
+                    <i class="bi bi-plus-lg me-1"></i> Cấp License
+                </a>
+            </div>
+            <div class="card-body p-0">
+                @if (!licenses.Any())
+                {
+                    <div class="p-3 text-muted text-center small">Chưa có bản quyền license nào được liên kết.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light text-muted">
+                                <tr>
+                                    <th class="ps-3">Máy tính</th>
+                                    <th>Global Domain (Email)</th>
+                                    <th>Active Account</th>
+                                    <th>Trạng thái</th>
+                                    <th class="text-end pe-3">Xem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var lic in licenses)
+                                {
+                                    <tr>
+                                        <td class="ps-3 font-monospace fw-semibold">@(lic.ComputerName ?? "—")</td>
+                                        <td>@(lic.GlobalDomain ?? "—")</td>
+                                        <td class="font-monospace">@(lic.ActiveAccount ?? "—")</td>
+                                        <td><span class="badge bg-success-subtle text-success">@(lic.KichHoat ?? "Enabled")</span></td>
+                                        <td class="text-end pe-3">
+                                            <a asp-controller="License" asp-action="Details" asp-route-id="@lic.Id" class="btn btn-sm btn-outline-info py-0 px-2"><i class="bi bi-eye"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- 3. Phần mềm đã cài đặt -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-app-indicator me-2 text-primary"></i>Phần mềm cài đặt (@apps.Count)
+                </h6>
+                <a asp-controller="ApplicationSoftware" asp-action="Create" asp-route-userId="@Model.Id" asp-route-owner="@Model.FullName" asp-route-phongBan="@Model.Department" class="btn btn-outline-primary btn-sm py-0">
+                    <i class="bi bi-plus-lg me-1"></i> Cài thêm PM
+                </a>
+            </div>
+            <div class="card-body p-0">
+                @if (!apps.Any())
+                {
+                    <div class="p-3 text-muted text-center small">Chưa có phần mềm nào được đăng ký cho nhân sự này.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light text-muted">
+                                <tr>
+                                    <th class="ps-3">Tên phần mềm</th>
+                                    <th>Loại</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày cài</th>
+                                    <th class="text-end pe-3">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var a in apps)
+                                {
+                                    <tr>
+                                        <td class="ps-3 fw-bold text-dark"><i class="bi bi-app me-1 text-primary"></i>@a.UngDung</td>
+                                        <td><span class="badge bg-light text-dark border">@(a.LoaiPhanMem ?? "Nội bộ")</span></td>
+                                        <td><span class="badge bg-success-subtle text-success">@(a.TrangThai ?? "Đang dùng")</span></td>
+                                        <td class="font-monospace text-muted">@(a.NgayCaiDat ?? "—")</td>
+                                        <td class="actions-col pe-3">
+                                            <div class="table-actions">
+                                                <a asp-controller="ApplicationSoftware" asp-action="Edit" asp-route-id="@a.Id" class="btn btn-light border" title="Chỉnh sửa"><i class="bi bi-pencil"></i></a>
+                                                <a asp-controller="ApplicationSoftware" asp-action="Details" asp-route-id="@a.Id" class="btn btn-outline-primary" title="Chi tiết"><i class="bi bi-eye"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

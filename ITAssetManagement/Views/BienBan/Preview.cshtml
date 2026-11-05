@@ -1,0 +1,369 @@
+@model ITAssetManagement.Models.BienBanViewModel
+
+@{
+    ViewData["Title"] = "Xem trước Biên bản #" + Model.SoBienBan;
+}
+
+<style>
+    .a4-sheet {
+        background: #ffffff;
+        width: 100%;
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 36px 44px;
+        border-radius: 4px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        color: #000;
+        font-family: Arial, "Helvetica Neue", sans-serif;
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    /* Corporate Header Table */
+    .company-header-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #777;
+        margin-bottom: 24px;
+    }
+
+    .company-header-table td {
+        border: 1px solid #777;
+        padding: 8px 12px;
+        vertical-align: middle;
+    }
+
+    /* Document Tables with Corporate Green Header */
+    .doc-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 16px;
+    }
+
+    .doc-table th, .doc-table td {
+        border: 1px solid #000;
+        padding: 6px 8px;
+        vertical-align: middle;
+    }
+
+    .doc-table th {
+        background-color: #00B050 !important;
+        color: #ffffff !important;
+        font-weight: bold;
+        text-align: center;
+        font-size: 12.5px;
+        padding: 8px 4px;
+    }
+
+    .doc-section-title {
+        font-weight: bold;
+        font-size: 13.5px;
+        margin-top: 14px;
+        margin-bottom: 4px;
+    }
+
+    @@media print {
+        body {
+            background: white !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .app-sidebar, .app-topbar, .preview-actions-bar, .no-print {
+            display: none !important;
+        }
+        .app-main, .app-content {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+        .a4-sheet {
+            box-shadow: none !important;
+            padding: 0 !important;
+            max-width: 100% !important;
+        }
+    }
+</style>
+
+<!-- ACTION TOOLBAR (STICKY TOP) -->
+<div class="card border-0 shadow-sm mb-4 preview-actions-bar bg-white sticky-top" style="top: 60px; z-index: 100;">
+    <div class="card-body p-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="history.back()">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại chỉnh sửa
+            </button>
+            <span class="badge bg-light text-dark border font-monospace">Số BB: #@Model.SoBienBan</span>
+            <span class="badge @(Model.LoaiBienBan == "Cấp phát" ? "bg-success" : "bg-danger")">
+                @Model.LoaiBienBan
+            </span>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <!-- 1. Xuất file Word (.docx) -->
+            <form asp-action="ExportWord" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.LoaiBienBan)
+                @Html.HiddenFor(m => m.SoBienBan)
+                @Html.HiddenFor(m => m.NgayBanGiao)
+                @Html.HiddenFor(m => m.NguoiBanGiao)
+                @Html.HiddenFor(m => m.ChucVu_BG)
+                @Html.HiddenFor(m => m.BoPhan_BG)
+                @Html.HiddenFor(m => m.NguoiNhan)
+                @Html.HiddenFor(m => m.ChucVu_Nhan)
+                @Html.HiddenFor(m => m.BoPhan_Nhan)
+                @Html.HiddenFor(m => m.LyDoBanGiao)
+                @Html.HiddenFor(m => m.TenThietBi)
+                @Html.HiddenFor(m => m.SerialNumber)
+                @Html.HiddenFor(m => m.DacTinhKyThuat)
+                @Html.HiddenFor(m => m.ThoiGianCap)
+                @Html.HiddenFor(m => m.Email_M365)
+                @Html.HiddenFor(m => m.Domain_Name)
+                @Html.HiddenFor(m => m.HasSalesProject)
+                @Html.HiddenFor(m => m.Email_Sales)
+                @Html.HiddenFor(m => m.MucTruyCap_ERP)
+                <button type="submit" class="btn btn-sm btn-primary px-3 shadow-xs">
+                    <i class="bi bi-file-earmark-word me-1"></i> Tải file Word (.docx)
+                </button>
+            </form>
+
+            <!-- 2. In ấn trực tiếp -->
+            <button type="button" class="btn btn-sm btn-light border px-3" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> In / Xuất PDF
+            </button>
+
+            <!-- 3. Lưu vào hệ thống -->
+            <form asp-action="SaveHistory" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.LoaiBienBan)
+                @Html.HiddenFor(m => m.SoBienBan)
+                @Html.HiddenFor(m => m.NgayBanGiao)
+                @Html.HiddenFor(m => m.NguoiBanGiao)
+                @Html.HiddenFor(m => m.ChucVu_BG)
+                @Html.HiddenFor(m => m.BoPhan_BG)
+                @Html.HiddenFor(m => m.NguoiNhan)
+                @Html.HiddenFor(m => m.ChucVu_Nhan)
+                @Html.HiddenFor(m => m.BoPhan_Nhan)
+                @Html.HiddenFor(m => m.LyDoBanGiao)
+                @Html.HiddenFor(m => m.ThietBiId)
+                @Html.HiddenFor(m => m.TenThietBi)
+                @Html.HiddenFor(m => m.SerialNumber)
+                <button type="submit" class="btn btn-sm btn-success px-3" onclick="return confirm('Xác nhận lưu thông tin biên bản vào hệ thống điều chuyển thiết bị?')">
+                    <i class="bi bi-check2-circle me-1"></i> Lưu vào Hệ thống
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- SIMULATED A4 DOCUMENT PREVIEW - 100% IDENTICAL TO HOÀNG ANH GROUP WORD TEMPLATE -->
+<div class="a4-sheet mb-5">
+    <!-- Corporate Header Box (3-column matching Word Header) -->
+    <table class="company-header-table">
+        <tr>
+            <td style="width: 170px; text-align: center; padding: 6px;">
+                <img src="~/images/hoanganh_logo.png" alt="Hoàng Anh Logo" style="max-height: 48px; max-width: 155px; object-fit: contain;" />
+            </td>
+            <td style="text-align: center; vertical-align: middle;">
+                <div class="fw-bold" style="font-size: 12px; letter-spacing: 0.5px; color: #555;">BIỂU MẪU</div>
+                <div class="fw-bold text-uppercase mt-1" style="font-size: 13.5px; color: #333; line-height: 1.3;">
+                    PHIẾU BÀN GIAO THIẾT BỊ & DỊCH VỤ CÔNG NGHỆ THÔNG TIN
+                </div>
+            </td>
+            <td style="width: 220px; font-size: 11px; line-height: 1.4; color: #333;">
+                <div>Mã số: <strong>ITUA001-F01</strong></div>
+                <div>Lần ban hành: <strong>01</strong></div>
+                <div>Ngày ban hành: <strong>27/03/2023</strong></div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Main Title -->
+    <div class="text-center mb-3">
+        <h4 class="fw-bold mb-0 text-uppercase" style="letter-spacing: 0.5px; font-size: 17px;">NỘI DUNG BÀN GIAO</h4>
+    </div>
+
+    <!-- Số biên bản & Ngày bàn giao -->
+    <div class="mb-2" style="font-size: 13px;">
+        <div class="mb-1">
+            <strong>Số biên bản:</strong> <span class="font-monospace">@Model.SoBienBan</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <strong>Loại bàn giao:</strong> &nbsp;
+                <span>@(Model.LoaiBienBan == "Cấp phát" ? "☒" : "☐") Cấp phát</span> &nbsp;&nbsp;
+                <span>@(Model.LoaiBienBan == "Thu hồi" ? "☒" : "☐") Thu hồi</span>
+            </div>
+            <div>
+                <strong>Ngày bàn giao:</strong> <span>@Model.NgayBanGiao</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bên bàn giao & Bên nhận bàn giao -->
+    <div class="mt-2 mb-2" style="font-size: 13px; line-height: 1.6;">
+        <div class="fw-bold fst-italic">BÊN BÀN GIAO</div>
+        <div class="ps-2">
+            <div><strong>Người bàn giao:</strong> @Model.NguoiBanGiao</div>
+            <div><strong>Chức vụ:</strong> @Model.ChucVu_BG</div>
+            <div><strong>Bộ phận:</strong> @Model.BoPhan_BG</div>
+        </div>
+
+        <div class="fw-bold fst-italic mt-2">BÊN NHẬN BÀN GIAO</div>
+        <div class="ps-2">
+            <div><strong>Người nhận bàn giao:</strong> @Model.NguoiNhan</div>
+            <div><strong>Chức vụ:</strong> @Model.ChucVu_Nhan</div>
+            <div><strong>Bộ phận:</strong> @Model.BoPhan_Nhan</div>
+        </div>
+
+        <div class="mt-2">
+            <strong>Lý do bàn giao:</strong> <span>@Model.LyDoBanGiao</span>
+        </div>
+    </div>
+
+    <p class="mt-2 mb-2 fst-italic" style="font-size: 12.5px;">Cùng bàn giao tài sản, thiết bị và dịch vụ làm việc theo biểu thống kê sau:</p>
+
+    <!-- 1. THIẾT BỊ -->
+    <div class="doc-section-title">1. &nbsp; Thiết bị</div>
+    <table class="doc-table">
+        <thead>
+            <tr>
+                <th style="width: 45px;">STT</th>
+                <th style="width: 200px;">Tên tài sản, thiết bị, dụng cụ …</th>
+                <th>Đặc tính kỹ thuật</th>
+                <th style="width: 85px;">Thời gian cấp</th>
+                <th style="width: 80px;">Thời gian hết hạn</th>
+                <th style="width: 50px;">Số lượng</th>
+                <th style="width: 50px;">ĐVT</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="text-center fw-bold">1</td>
+                <td>
+                    <div class="fw-bold">@Model.TenThietBi</div>
+                    @if (!string.IsNullOrEmpty(Model.SerialNumber))
+                    {
+                        <div class="small text-muted font-monospace">SN: @Model.SerialNumber</div>
+                    }
+                </td>
+                <td style="white-space: pre-line; line-height: 1.4;">@Model.DacTinhKyThuat</td>
+                <td class="text-center font-monospace">@Model.ThoiGianCap</td>
+                <td class="text-center"></td>
+                <td class="text-center">1</td>
+                <td class="text-center">Cái</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- 2. PHẦN MỀM -->
+    <div class="doc-section-title">2. &nbsp; Phần mềm</div>
+    <table class="doc-table">
+        <thead>
+            <tr>
+                <th style="width: 45px;">STT</th>
+                <th style="width: 170px;">Phần mềm đã cài đặt</th>
+                <th>Diễn giải</th>
+                <th style="width: 190px;">Tài khoản</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="text-center fw-bold">1</td>
+                <td class="fw-semibold">Phần mềm cơ bản</td>
+                <td style="font-size: 12px; line-height: 1.35;">
+                    Ultraview: trình điều khiển từ xa<br/>
+                    Unikey: trình gõ chứ window<br/>
+                    Winrar: đọc file được nén thành .rar, .7zip, .iso,…<br/>
+                    Chrome: Công cụ tìm kiếm<br/>
+                    Foxit Reader: hỗ trợ đọc file .pdf
+                </td>
+                <td class="text-center">—</td>
+            </tr>
+            <tr>
+                <td class="text-center fw-bold">2</td>
+                <td></td>
+                <td class="fw-semibold">Microsoft Office 365: Word, Excel, Outlook, Teams, Powerpoint</td>
+                <td><strong class="font-monospace text-primary">@Model.Email_M365</strong></td>
+            </tr>
+            <tr>
+                <td class="text-center fw-bold">3</td>
+                <td class="fw-semibold">ERP</td>
+                <td style="font-size: 12px;">Hoạch định tài nguyên doanh nghiệp nguyên thủy ám chỉ một hệ thống dùng để hoạch định tài nguyên trong một tổ chức, một doanh nghiệp</td>
+                <td><strong class="font-monospace">@Model.Domain_Name</strong></td>
+            </tr>
+            @if (Model.HasSalesProject)
+            {
+                <tr>
+                    <td class="text-center fw-bold">4</td>
+                    <td class="fw-semibold">Sales Project</td>
+                    <td style="font-size: 12px;">Phần mềm tạo quản lý dự án</td>
+                    <td><strong class="font-monospace text-primary">@(Model.Email_Sales ?? Model.Email_M365)</strong></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- 3. PHÂN QUYỀN TRUY CẬP -->
+    <div class="doc-section-title">3. &nbsp; Phân quyền</div>
+    <table class="doc-table">
+        <thead>
+            <tr>
+                <th style="width: 45px;">STT</th>
+                <th style="width: 140px;">Tên truy cập</th>
+                <th>Diễn giải</th>
+                <th style="width: 130px;">Xác nhận HoD (nếu có)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="text-center fw-bold">1</td>
+                <td class="fw-semibold">Shared disk</td>
+                <td style="font-size: 12px; line-height: 1.35;">
+                    Disk M:\ HoangAnh1 gồm các mục mặc định:<br/>
+                    2. Human Resource (- 2.0 Qui che – Chinh sach, - 2.6 IT)<br/>
+                    8. Public (- 8.1 Hinh Anh Nhan Vien, - 8.2 ISO 9001 - HACCP)<br/>
+                    <em>Disk M:\ HoangAnh1 phân quyền theo chức danh công việc</em>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="text-center fw-bold">2</td>
+                <td class="fw-semibold">Group mail</td>
+                <td style="font-size: 12px;">Tên: Office Hoàng Anh | Email: office@hoanganh.com.vn</td>
+                <td></td>
+            </tr>
+            @if (Model.HasSalesProject)
+            {
+                <tr>
+                    <td class="text-center fw-bold">3</td>
+                    <td class="fw-semibold">Sales Project</td>
+                    <td style="font-size: 12px;">Phân quyền theo công việc</td>
+                    <td></td>
+                </tr>
+            }
+            <tr>
+                <td class="text-center fw-bold">4</td>
+                <td class="fw-semibold">ERP</td>
+                <td style="font-size: 12px; white-space: pre-line; line-height: 1.4;">@Model.MucTruyCap_ERP</td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- CHỮ KÝ 2 BÊN -->
+    <table style="width: 100%; border: none; margin-top: 32px; text-align: center;">
+        <tr>
+            <td style="width: 50%; border: none; vertical-align: top;">
+                <div class="fw-bold">Người được bàn giao</div>
+                <div class="fst-italic small text-muted">(Ký & ghi rõ họ tên)</div>
+                <div style="height: 65px;"></div>
+                <div class="fw-bold" style="font-size: 13.5px;">@Model.NguoiNhan</div>
+            </td>
+            <td style="width: 50%; border: none; vertical-align: top;">
+                <div class="fw-bold">Người bàn giao</div>
+                <div class="fst-italic small text-muted">(Ký & ghi rõ họ tên)</div>
+                <div style="height: 65px;"></div>
+                <div class="fw-bold" style="font-size: 13.5px;">@Model.NguoiBanGiao</div>
+            </td>
+        </tr>
+    </table>
+</div>

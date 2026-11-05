@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Hoàng Anh Group IT Asset Management Pro</title>
+    <!-- Favicon & App Icons -->
+    <link rel="icon" type="image/png" href="~/logo.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico" />
+    <link rel="apple-touch-icon" href="~/logo.png" />
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom Modern Desktop CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="app-container">
+        <!-- LEFT SIDEBAR -->
+        <aside class="app-sidebar">
+            <!-- Brand / Logo -->
+            <div class="sidebar-header">
+                <div class="sidebar-logo p-0 overflow-hidden" style="background: transparent; box-shadow: none;">
+                    <img src="~/logo.png" alt="Hoàng Anh Logo" style="width: 38px; height: 38px; object-fit: contain; border-radius: 8px;" />
+                </div>
+                <div>
+                    <div class="sidebar-brand-title">Hoàng Anh Group</div>
+                    <div class="sidebar-brand-sub">IT Asset Manager v2.0</div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Danh mục Quản lý</div>
+                
+                @{
+                    string currentCtrl = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+                }
+
+                <a asp-controller="ThietBi" asp-action="Index" 
+                   class="sidebar-nav-link @(currentCtrl == "ThietBi" ? "active" : "")">
+                    <i class="bi bi-laptop"></i>
+                    <span>Thiết bị IT</span>
+                </a>
+
+                <a asp-controller="Users" asp-action="Index" 
+                   class="sidebar-nav-link @(currentCtrl == "Users" ? "active" : "")">
+                    <i class="bi bi-people"></i>
+                    <span>Nhân sự (Users)</span>
+                </a>
+
+                <a asp-controller="License" asp-action="Index" 
+                   class="sidebar-nav-link @(currentCtrl == "License" ? "active" : "")">
+                    <i class="bi bi-key"></i>
+                    <span>Bản quyền & License</span>
+                </a>
+
+                <a asp-controller="ApplicationSoftware" asp-action="Index" 
+                   class="sidebar-nav-link @(currentCtrl == "ApplicationSoftware" ? "active" : "")">
+                    <i class="bi bi-app-indicator"></i>
+                    <span>Phần mềm cài đặt</span>
+                </a>
+
+                <a asp-controller="BaoTri" asp-action="Index" 
+                   class="sidebar-nav-link @(currentCtrl == "BaoTri" ? "active" : "")">
+                    <i class="bi bi-tools"></i>
+                    <span>Bảo trì & Sửa chữa</span>
+                </a>
+
+                <a asp-controller="BienBan" asp-action="Index" 
+                   class="sidebar-nav-link @(currentCtrl == "BienBan" ? "active" : "")">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Biên bản Bàn giao</span>
+                </a>
+
+                <div class="nav-section-title mt-3">Hệ thống</div>
+
+                <a asp-controller="Settings" asp-action="Index" 
+                   class="sidebar-nav-link @(currentCtrl == "Settings" ? "active" : "")">
+                    <i class="bi bi-database-gear"></i>
+                    <span>Cấu hình CSDL</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <a asp-controller="Settings" asp-action="Index" class="db-status-pill" title="Bấm để đổi kết nối máy chủ">
+                    <span class="d-flex align-items-center gap-2">
+                        <span class="status-dot"></span>
+                        <span class="fw-semibold text-truncate" style="max-width: 140px;">SQL: ITAssetDB</span>
+                    </span>
+                    <i class="bi bi-chevron-right text-muted" style="font-size: 10px;"></i>
+                </a>
+
+                <a asp-controller="Home" asp-action="ExitApp" 
+                   class="btn btn-sm btn-outline-danger w-100" 
+                   onclick="return confirm('Bạn có chắc chắn muốn đóng ứng dụng?')">
+                    <i class="bi bi-power me-1"></i> Thoát ứng dụng
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="app-main">
+            <!-- TOPBAR -->
+            <header class="app-topbar">
+                <div class="topbar-title">
+                    <span class="text-muted">Quản trị</span>
+                    <i class="bi bi-chevron-right text-muted" style="font-size: 11px;"></i>
+                    <span class="fw-semibold text-dark">@ViewData["Title"]</span>
+                </div>
+
+                <div class="topbar-actions">
+                    <a asp-controller="Settings" asp-action="Index" class="btn btn-sm btn-light border">
+                        <i class="bi bi-server me-1 text-primary"></i> Đổi Máy chủ
+                    </a>
+                    <div class="vr mx-1 my-2"></div>
+                    <div class="d-flex align-items-center gap-2 ps-2">
+                        <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; font-size: 12px; font-weight: 600;">
+                            IT
+                        </div>
+                        <span class="fw-semibold small text-dark d-none d-md-inline">Admin</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- SCROLLABLE CONTENT BODY -->
+            <main class="app-content">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="background-color: var(--color-success-light); color: #1b8738; border-radius: var(--radius-md);">
+                        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="background-color: var(--color-danger-light); color: #d70015; border-radius: var(--radius-md);">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

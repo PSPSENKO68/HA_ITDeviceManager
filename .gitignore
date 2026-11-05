@@ -1,20 +1,24 @@
-# v0 sandbox internal files
-__v0_runtime_loader.js
-__v0_devtools.tsx
-__v0_jsx-dev-runtime.ts
-.snowflake/
-.v0-trash/
-.vercel/
+# Visual Studio & Tooling
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
 
-# Environment variables
+# .NET Build & Publish outputs
+**/bin/
+**/obj/
+publish/
+
+# Environment & Temp
 .env*.local
+*.log
+*.tmp
 
-# Common ignores
-node_modules
-.next/
+# Office temp files
+~$*
+
+# OS Files
+Thumbs.db
+Desktop.ini
 .DS_Store
-
-# Build outputs
-desktop-app/dist/
-desktop-app/dist-electron/
-*.exe

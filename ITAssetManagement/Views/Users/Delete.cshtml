@@ -1,0 +1,66 @@
+@model ITAssetManagement.Models.User
+
+@{
+    ViewData["Title"] = "Xác nhận xóa Nhân sự - " + Model.FullName;
+    int deviceCount = ViewBag.DeviceCount ?? 0;
+    int licenseCount = ViewBag.LicenseCount ?? 0;
+    int appCount = ViewBag.AppCount ?? 0;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm border-top border-danger border-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="fw-bold mb-0 text-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận Xóa Nhân sự
+                </h5>
+            </div>
+            <div class="card-body p-4 text-center">
+                <div class="avatar bg-danger-subtle text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; font-size: 1.8rem;">
+                    <i class="bi bi-person-x-fill"></i>
+                </div>
+                <h5 class="fw-bold text-dark">Bạn có chắc chắn muốn xóa nhân sự này?</h5>
+                <p class="text-muted">Dữ liệu nhân sự sẽ bị xóa khỏi danh sách. Vui lòng kiểm tra các tài sản đang liên kết trước khi thực hiện.</p>
+
+                <div class="bg-light p-3 rounded text-start my-3">
+                    <div class="row g-2">
+                        <div class="col-sm-4 text-muted">Họ và tên:</div>
+                        <div class="col-sm-8 fw-bold text-dark">@Model.FullName</div>
+
+                        <div class="col-sm-4 text-muted">Username:</div>
+                        <div class="col-sm-8 font-monospace">@Model.Username</div>
+
+                        <div class="col-sm-4 text-muted">Phòng ban:</div>
+                        <div class="col-sm-8">@(Model.Department ?? "—")</div>
+
+                        <div class="col-sm-4 text-muted">Vai trò:</div>
+                        <div class="col-sm-8">@(Model.Role ?? "User")</div>
+                    </div>
+                </div>
+
+                @if (deviceCount > 0 || licenseCount > 0 || appCount > 0)
+                {
+                    <div class="alert alert-warning text-start small">
+                        <i class="bi bi-exclamation-circle-fill me-1"></i> <strong>Lưu ý:</strong> Nhân sự này đang liên kết với:
+                        <ul class="mb-0 mt-1">
+                            @if (deviceCount > 0) { <li><strong>@deviceCount</strong> thiết bị IT</li> }
+                            @if (licenseCount > 0) { <li><strong>@licenseCount</strong> tài khoản license</li> }
+                            @if (appCount > 0) { <li><strong>@appCount</strong> phần mềm cài đặt</li> }
+                        </ul>
+                    </div>
+                }
+
+                <form asp-action="Delete" method="post" class="mt-4">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="d-flex justify-content-center gap-2">
+                        <a asp-action="Index" class="btn btn-light border px-4">Hủy bỏ</a>
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="bi bi-trash me-1"></i> Xác nhận Xóa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

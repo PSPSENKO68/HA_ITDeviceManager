@@ -1,0 +1,106 @@
+@model IEnumerable<ITAssetManagement.Models.LichSuDieuChuyen>
+
+@{
+    ViewData["Title"] = "Biên bản Bàn giao & Điều chuyển";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-file-earmark-text me-2 text-primary"></i>Biên bản Bàn giao & Thu hồi
+        </h3>
+        <p class="text-muted small mb-0">Tạo, xem trước (Review) và xuất file Word biên bản Cấp phát / Thu hồi tài sản IT chuẩn mẫu Hoàng Anh Group</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Create" asp-route-loai="Cấp phát" class="btn btn-sm btn-primary px-3 shadow-xs">
+            <i class="bi bi-plus-lg me-1"></i> Tạo Biên bản Cấp phát
+        </a>
+        <a asp-action="Create" asp-route-loai="Thu hồi" class="btn btn-sm btn-outline-danger px-3 shadow-xs">
+            <i class="bi bi-arrow-down-circle me-1"></i> Tạo Biên bản Thu hồi
+        </a>
+    </div>
+</div>
+
+<!-- Lịch sử điều chuyển gần đây -->
+<div class="card border-0 shadow-xs">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <span class="fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Lịch sử bàn giao / điều chuyển gần đây (@ViewBag.TotalCount)</span>
+        <span class="badge bg-light text-muted border">50 bản ghi mới nhất</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4" style="width: 120px;">Ngày</th>
+                        <th>Loại biên bản</th>
+                        <th>Từ (Bên giao)</th>
+                        <th>Sang (Bên nhận)</th>
+                        <th>Chi tiết bàn giao</th>
+                        <th>Người ghi nhận</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2 text-muted opacity-50"></i>
+                                Chưa có biên bản bàn giao nào được lưu trong hệ thống.
+                                <div class="mt-2">
+                                    <a asp-action="Create" class="btn btn-sm btn-outline-primary">Tạo biên bản đầu tiên ngay</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 font-monospace small fw-semibold text-muted">
+                                    @(item.Ngay ?? item.NgayTao?.ToString("dd/MM/yyyy") ?? "—")
+                                </td>
+                                <td>
+                                    @if (item.LoaiHanhDong == "Cấp phát")
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                            <i class="bi bi-check-circle me-1"></i>Cấp phát
+                                        </span>
+                                    }
+                                    else if (item.LoaiHanhDong == "Thu hồi")
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                            <i class="bi bi-arrow-down-circle me-1"></i>Thu hồi
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-dark border">@(item.LoaiHanhDong ?? "Điều chuyển")</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark">@(item.OwnerCu ?? "—")</div>
+                                    <div class="small text-muted">@(item.PhongBanCu ?? "—")</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark">@(item.OwnerMoi ?? "—")</div>
+                                    <div class="small text-muted">@(item.PhongBanMoi ?? "—")</div>
+                                </td>
+                                <td>
+                                    <div class="small text-dark text-truncate" style="max-width: 320px;" title="@item.ChiTiet">
+                                        @(item.ChiTiet ?? "—")
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="small text-muted">@(item.NguoiThucHien ?? "IT Helpdesk")</span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

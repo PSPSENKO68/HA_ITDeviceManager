@@ -1,0 +1,192 @@
+@model ITAssetManagement.Models.LichSuBaoTri
+
+@{
+    ViewData["Title"] = "Chỉnh sửa phiếu bảo trì #" + Model.Id;
+    var devices = ViewBag.Devices as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+
+    string FormatForDateInput(string? dateStr)
+    {
+        if (string.IsNullOrWhiteSpace(dateStr)) return "";
+        string[] formats = { "yyyy-MM-dd", "M/d/yyyy", "MM/dd/yyyy", "d/M/yyyy", "dd/MM/yyyy", "yyyy/MM/dd" };
+        if (DateTime.TryParseExact(dateStr.Trim(), formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var dt))
+        {
+            return dt.ToString("yyyy-MM-dd");
+        }
+        if (DateTime.TryParse(dateStr.Trim(), out dt))
+        {
+            return dt.ToString("yyyy-MM-dd");
+        }
+        return dateStr;
+    }
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold mb-0 text-primary">
+                        <i class="bi bi-pencil-square me-2"></i>Chỉnh sửa phiếu bảo trì #@Model.Id
+                    </h5>
+                    <div class="text-muted small">Cập nhật tiến độ xử lý, chi phí hoặc thông tin kỹ thuật</div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-eye me-1"></i> Xem chi tiết
+                    </a>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Danh sách
+                    </a>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="Id" />
+
+                    <!-- 1. THÔNG TIN THIẾT BỊ -->
+                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                        <i class="bi bi-laptop me-2 text-primary"></i>1. Thiết bị cần bảo trì / sửa chữa
+                    </h6>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Chọn thiết bị trong hệ thống</label>
+                            <select asp-for="ThietBiId" class="form-select" id="deviceSelect" onchange="onDeviceSelectChanged()">
+                                <option value="">-- Chọn thiết bị (hoặc nhập tay bên dưới) --</option>
+                                @foreach (var d in devices)
+                                {
+                                    <option value="@d.Id" 
+                                            data-model="@d.Model" 
+                                            data-serial="@d.SerialNumber"
+                                            selected="@(Model.ThietBiId == d.Id)">
+                                        @d.Model (@d.SerialNumber) - @(d.Owner ?? "Chưa gán")
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="TieuDe" class="form-label fw-semibold">Tiêu đề / Công việc <span class="text-danger">*</span></label>
+                            <input asp-for="TieuDe" class="form-control" required />
+                            <span asp-validation-for="TieuDe" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Model" class="form-label fw-semibold">Tên máy / Model</label>
+                            <input asp-for="Model" class="form-control" id="modelInput" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="SerialNumber" class="form-label fw-semibold">Serial Number</label>
+                            <input asp-for="SerialNumber" class="form-control font-monospace" id="serialInput" />
+                        </div>
+                    </div>
+
+                    <!-- 2. KẾ HOẠCH & TIẾN ĐỘ -->
+                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                        <i class="bi bi-calendar-check me-2 text-primary"></i>2. Phân loại & Tiến độ thực hiện
+                    </h6>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="LoaiHanhDong" class="form-label fw-semibold">Phân loại hành động <span class="text-danger">*</span></label>
+                            <select asp-for="LoaiHanhDong" class="form-select" required>
+                                <option value="Bảo trì định kỳ">Bảo trì định kỳ</option>
+                                <option value="Sửa chữa sự cố">Sửa chữa sự cố</option>
+                                <option value="Thay thế linh kiện">Thay thế linh kiện</option>
+                                <option value="Nâng cấp phần cứng">Nâng cấp phần cứng</option>
+                                <option value="Vệ sinh thiết bị">Vệ sinh thiết bị</option>
+                                <option value="Kiểm tra kỹ thuật">Kiểm tra kỹ thuật</option>
+                                <option value="Cài lại hệ điều hành">Cài lại hệ điều hành</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="TrangThai" class="form-label fw-semibold">Trạng thái phiếu</label>
+                            <select asp-for="TrangThai" class="form-select">
+                                <option value="Kế hoạch">📅 Kế hoạch (Chờ làm)</option>
+                                <option value="Đang xử lý">⏳ Đang xử lý</option>
+                                <option value="Hoàn thành">✅ Hoàn thành</option>
+                                <option value="Đã hủy">❌ Đã hủy</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="NguoiThucHien" class="form-label fw-semibold">Kỹ thuật viên / Đơn vị thực hiện</label>
+                            <input asp-for="NguoiThucHien" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="NgayDuKien" class="form-label fw-semibold">Ngày dự kiến (cho kế hoạch)</label>
+                            <input name="NgayDuKien" type="date" class="form-control" value="@FormatForDateInput(Model.NgayDuKien)" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="NgayThucHien" class="form-label fw-semibold">Ngày thực hiện (nếu đã xong)</label>
+                            <input name="NgayThucHien" type="date" class="form-control" value="@FormatForDateInput(Model.NgayThucHien)" />
+                        </div>
+                    </div>
+
+                    <!-- 3. CHI PHÍ & CHI TIẾT KỸ THUẬT -->
+                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+                        <i class="bi bi-wallet2 me-2 text-primary"></i>3. Chi phí & Linh kiện
+                    </h6>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="ChiPhi" class="form-label fw-semibold">Chi phí (VNĐ)</label>
+                            <div class="input-group">
+                                <input asp-for="ChiPhi" type="number" min="0" step="1000" class="form-control" />
+                                <span class="input-group-text bg-white">VNĐ</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="LinhKienThayThe" class="form-label fw-semibold">Linh kiện thay thế (nếu có)</label>
+                            <input asp-for="LinhKienThayThe" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label asp-for="ChiTiet" class="form-label fw-semibold">Nội dung chi tiết / Hiện tượng lỗi</label>
+                            <textarea asp-for="ChiTiet" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="col-md-12">
+                            <label asp-for="GhiChu" class="form-label fw-semibold">Ghi chú thêm</label>
+                            <input asp-for="GhiChu" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash me-1"></i> Xóa phiếu này
+                        </a>
+                        <div class="d-flex gap-2">
+                            <a asp-action="Index" class="btn btn-light border px-4">Hủy</a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-lg me-1"></i> Cập nhật thay đổi
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function onDeviceSelectChanged() {
+            var select = document.getElementById("deviceSelect");
+            var selectedOption = select.options[select.selectedIndex];
+            if (selectedOption && selectedOption.value) {
+                var model = selectedOption.getAttribute("data-model");
+                var serial = selectedOption.getAttribute("data-serial");
+                if (model) document.getElementById("modelInput").value = model;
+                if (serial) document.getElementById("serialInput").value = serial;
+            }
+        }
+    </script>
+}

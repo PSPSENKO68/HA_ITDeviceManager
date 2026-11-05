@@ -1,0 +1,86 @@
+@model ITAssetManagement.Models.User
+
+@{
+    ViewData["Title"] = "Thêm mới Nhân sự / Người dùng";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-primary">
+                    <i class="bi bi-person-plus-fill me-2"></i>Thêm mới Nhân sự / Người dùng
+                </h5>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Quay lại
+                </a>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Username" class="form-label fw-semibold">Tên đăng nhập (Username) <span class="text-danger">*</span></label>
+                            <input asp-for="Username" class="form-control" required placeholder="Ví dụ: duy.nguyenhk..." />
+                            <span asp-validation-for="Username" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="FullName" class="form-label fw-semibold">Họ và tên <span class="text-danger">*</span></label>
+                            <input asp-for="FullName" class="form-control" required placeholder="Ví dụ: Nguyễn Hoàng Duy..." />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold">Địa chỉ Email</label>
+                            <input asp-for="Email" type="email" class="form-control" placeholder="name@hagroup.vn..." />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Role" class="form-label fw-semibold">Vai trò / Phân quyền</label>
+                            <select asp-for="Role" class="form-select">
+                                <option value="User">User (Nhân viên thông thường)</option>
+                                <option value="IT Support">IT Support (Hỗ trợ kỹ thuật)</option>
+                                <option value="Admin">Admin (Quản trị viên toàn quyền)</option>
+                                <option value="Manager">Manager (Quản lý)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Department" class="form-label fw-semibold">Phòng ban / Bộ phận</label>
+                            <input asp-for="Department" class="form-control" placeholder="Ví dụ: Phòng Kỹ thuật IT, P. Kế toán..." />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Position" class="form-label fw-semibold">Chức danh / Vị trí công tác</label>
+                            <input asp-for="Position" class="form-control" placeholder="Ví dụ: Chuyên viên IT, Trưởng phòng..." />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Block" class="form-label fw-semibold">Khối / Khu vực làm việc</label>
+                            <input asp-for="Block" class="form-control" placeholder="Ví dụ: Khối Văn phòng, Nhà máy..." />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Trạng thái hoạt động</label>
+                            <select name="IsActive" class="form-select">
+                                <option value="true" selected>Đang kích hoạt (Active)</option>
+                                <option value="false">Tạm khóa (Locked)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-light border px-4">Hủy bỏ</a>
+                        <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check-lg me-1"></i> Lưu thông tin</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,121 @@
+@model ITAssetManagement.Models.License
+
+@{
+    ViewData["Title"] = "Chi tiết Bản quyền - " + (Model.Owner ?? "License");
+    var user = ViewBag.User as ITAssetManagement.Models.User;
+    var device = ViewBag.Device as ITAssetManagement.Models.ThietBi;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-primary">
+                    <i class="bi bi-info-circle me-2"></i>Chi tiết Bản quyền / License
+                </h5>
+                <div>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary btn-sm me-1">
+                        <i class="bi bi-pencil me-1"></i> Chỉnh sửa
+                    </a>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                    <div class="avatar bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center me-3" style="width: 54px; height: 54px; font-size: 1.5rem;">
+                        <i class="bi bi-key"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1">@(Model.Owner ?? "Chưa gán người sở hữu")</h4>
+                        <div>
+                            @if (Model.KichHoat == "Enabled" || Model.KichHoat == "Active" || Model.KichHoat == "Kích hoạt")
+                            {
+                                <span class="badge bg-success-subtle text-success border border-success-subtle me-2">
+                                    <i class="bi bi-check-circle me-1"></i>Enabled
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary-subtle text-secondary border me-2">@(Model.KichHoat ?? "Disabled")</span>
+                            }
+                            <span class="badge bg-light text-dark border">@(Model.PhongBan ?? "Chưa rõ phòng ban")</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="fw-bold text-muted small text-uppercase mb-3">Tài khoản & Bản quyền</h6>
+                            <dl class="row mb-0">
+                                <dt class="col-sm-5 text-muted">Global Domain:</dt>
+                                <dd class="col-sm-7 fw-semibold">
+                                    @if (!string.IsNullOrEmpty(Model.GlobalDomain))
+                                    {
+                                        <a href="mailto:@Model.GlobalDomain" class="text-decoration-none">@Model.GlobalDomain</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </dd>
+
+                                <dt class="col-sm-5 text-muted">Local Domain:</dt>
+                                <dd class="col-sm-7 font-monospace">@(Model.LocalDomain ?? "—")</dd>
+
+                                <dt class="col-sm-5 text-muted">Active Office:</dt>
+                                <dd class="col-sm-7 font-monospace fw-bold text-primary">@(Model.ActiveAccount ?? "—")</dd>
+
+                                <dt class="col-sm-5 text-muted">Cập nhật lúc:</dt>
+                                <dd class="col-sm-7 font-monospace text-muted small">@(Model.NgayCapNhat?.ToString("MM/dd/yyyy HH:mm") ?? "—")</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="fw-bold text-muted small text-uppercase mb-3">Máy tính & Hồ sơ Nhân sự</h6>
+                            <dl class="row mb-0">
+                                <dt class="col-sm-5 text-muted">Computer Name:</dt>
+                                <dd class="col-sm-7 font-monospace fw-semibold">
+                                    @(Model.ComputerName ?? "—")
+                                    @if (device != null)
+                                    {
+                                        <a asp-controller="ThietBi" asp-action="Details" asp-route-id="@device.Id" class="badge bg-primary text-decoration-none ms-1">
+                                            Xem máy
+                                        </a>
+                                    }
+                                </dd>
+
+                                <dt class="col-sm-5 text-muted">Hồ sơ Nhân sự:</dt>
+                                <dd class="col-sm-7">
+                                    @if (user != null)
+                                    {
+                                        <a asp-controller="Users" asp-action="Details" asp-route-id="@user.Id" class="text-decoration-none fw-semibold">
+                                            @user.FullName (@user.Username)
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa gán User ID</span>
+                                    }
+                                </dd>
+
+                                <dt class="col-sm-5 text-muted">Bộ phận:</dt>
+                                <dd class="col-sm-7">@(Model.PhongBan ?? "—")</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top py-3 text-end">
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-trash me-1"></i> Xóa License này
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
