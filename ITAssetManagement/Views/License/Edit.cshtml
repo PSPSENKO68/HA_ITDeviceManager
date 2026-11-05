@@ -25,16 +25,25 @@
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Gán cho Nhân sự (Users)</label>
-                            <select asp-for="UserId" class="form-select" id="userSelect" onchange="onUserChanged()">
-                                <option value="">-- Chọn nhân sự (Tùy chọn) --</option>
-                                @foreach (var u in users)
-                                {
-                                    <option value="@u.Id" data-fullname="@u.FullName" data-dept="@u.Department" data-email="@u.Email" selected="@(Model.UserId == u.Id)">
-                                        @u.FullName (@u.Username) - @u.Department
-                                    </option>
-                                }
-                            </select>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-semibold mb-0">Gán cho Nhân sự (Users)</label>
+                                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-2 py-0" onclick="openUserPickerModal()">
+                                    <i class="bi bi-search me-1" style="font-size: 11px;"></i>Tìm nhân sự...
+                                </button>
+                            </div>
+                            <div class="input-group">
+                                <input type="hidden" asp-for="UserId" id="userIdInput" />
+                                <input type="text" class="form-control" id="selectedUserText" readonly
+                                       placeholder="-- Bấm nút tìm kiếm để chọn nhân sự --"
+                                       value="@(users.FirstOrDefault(u => u.Id == Model.UserId) != null ? $"{users.First(u => u.Id == Model.UserId).FullName} ({users.First(u => u.Id == Model.UserId).Username}) - {users.First(u => u.Id == Model.UserId).Department}" : "")" />
+                                <button type="button" class="btn btn-outline-primary" onclick="openUserPickerModal()" title="Tìm & Chọn nhân sự">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="clearSelectedUser()" title="Xóa chọn">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                            <div class="form-text small" style="font-size: 11px;">Bấm tìm kiếm nhanh không dấu để tự điền Họ tên, Phòng ban, Email</div>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="Owner" class="form-label fw-semibold">Người sở hữu (Owner) <span class="text-danger">*</span></label>
@@ -69,7 +78,7 @@
                         </div>
                         <div class="col-md-6">
                             <label asp-for="LocalDomain" class="form-label fw-semibold">Local Domain (Nội bộ)</label>
-                            <input asp-for="LocalDomain" class="form-control" />
+                            <input asp-for="LocalDomain" class="form-control" id="localDomainInput" />
                         </div>
                     </div>
 
@@ -98,19 +107,193 @@
     </div>
 </div>
 
+<!-- ============================================================
+     SEARCHABLE USER PICKER MODAL
+     ============================================================ -->
+<div class="modal fade" id="userPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg border-0" style="border-radius: var(--radius-lg); overflow: hidden;">
+            <div class="modal-header bg-white py-3 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="stat-icon blue" style="width: 36px; height: 36px; font-size: 16px;">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title fw-bold text-dark mb-0">Chọn Nhân sự gán License</h6>
+                        <small class="text-muted">Gõ để tìm nhanh theo Họ tên, Chức vụ, Email hoặc Phòng ban</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Search Bar in Modal -->
+            <div class="p-3 border-bottom bg-light">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="userSearchModalInput" class="form-control border-start-0 ps-0" 
+                           placeholder="🔍 Gõ tìm kiếm... (vd: Xíu, Duy, Phong, RnD, Kế toán...)" autocomplete="off" autofocus />
+                    <button class="btn btn-outline-secondary" type="button" onclick="clearUserSearch()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2 px-1">
+                    <small class="text-muted" id="userMatchCountText">Đang hiển thị toàn bộ nhân sự</small>
+                    <small class="text-muted fst-italic">Hỗ trợ tìm tiếng Việt có dấu và không dấu</small>
+                </div>
+            </div>
+
+            <!-- Scrollable User Cards -->
+            <div class="modal-body p-3" style="max-height: 420px; overflow-y: auto;">
+                <div class="row g-2" id="userCardsContainer">
+                    @foreach (var u in users)
+                    {
+                        string fullname = u.FullName ?? "";
+                        string dept = u.Department ?? "";
+                        string pos = u.Position ?? "Nhân viên";
+                        string email = u.Email ?? "";
+                        string username = u.Username ?? "";
+                        string initial = !string.IsNullOrEmpty(fullname) ? fullname.Substring(0, 1).ToUpper() : "U";
+
+                        <div class="col-md-6 user-picker-item" 
+                             data-id="@u.Id"
+                             data-fullname="@fullname"
+                             data-dept="@dept"
+                             data-position="@pos"
+                             data-email="@email"
+                             data-username="@username"
+                             data-search="@(fullname + " " + dept + " " + pos + " " + email + " " + username)">
+                            <div class="p-3 border rounded-3 bg-white h-100 d-flex align-items-center gap-3 user-item-card"
+                                 onclick="selectUserFromModal('@u.Id')"
+                                 style="cursor: pointer; transition: all 0.15s ease;">
+                                <div class="user-avatar-circle flex-shrink-0" 
+                                     style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--brand-orange-dark) 0%, var(--brand-orange-light) 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px;">
+                                    @initial
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="fw-bold text-dark text-truncate" style="font-size: 14px;">@fullname</div>
+                                    <div class="d-flex align-items-center gap-1 my-1 flex-wrap">
+                                        @if (!string.IsNullOrEmpty(dept))
+                                        {
+                                            <span class="badge bg-light text-secondary border small" style="font-size: 11px;">@dept</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(pos))
+                                        {
+                                            <span class="badge bg-light text-dark border small" style="font-size: 11px;">@pos</span>
+                                        }
+                                    </div>
+                                    <div class="small text-muted text-truncate" style="font-size: 12px;">
+                                        <i class="bi bi-envelope me-1"></i>@(string.IsNullOrEmpty(email) ? username : email)
+                                    </div>
+                                </div>
+                                <div class="text-primary flex-shrink-0 opacity-0 select-icon">
+                                    <i class="bi bi-check-circle-fill fs-5"></i>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .user-item-card:hover {
+        border-color: var(--color-primary) !important;
+        background-color: var(--color-primary-light) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .user-item-card:hover .select-icon {
+        opacity: 1 !important;
+    }
+</style>
+
 @section Scripts {
     <script>
-        function onUserChanged() {
-            var select = document.getElementById('userSelect');
-            var selectedOption = select.options[select.selectedIndex];
-            if (selectedOption && selectedOption.value) {
-                var name = selectedOption.getAttribute('data-fullname');
-                var dept = selectedOption.getAttribute('data-dept');
-                var email = selectedOption.getAttribute('data-email');
-                if (name) document.getElementById('ownerInput').value = name;
-                if (dept) document.getElementById('deptInput').value = dept;
-                if (email) document.getElementById('emailInput').value = email;
+        function removeVietnameseTones(str) {
+            if (!str) return '';
+            str = str.toLowerCase();
+            str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            str = str.replace(/[đĐ]/g, 'd');
+            return str.trim();
+        }
+
+        function openUserPickerModal() {
+            const modalEl = document.getElementById('userPickerModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+
+            setTimeout(() => {
+                const searchInput = document.getElementById('userSearchModalInput');
+                searchInput.value = '';
+                filterUserCards('');
+                searchInput.focus();
+            }, 300);
+        }
+
+        document.getElementById('userSearchModalInput').addEventListener('input', function() {
+            filterUserCards(this.value);
+        });
+
+        function clearUserSearch() {
+            const input = document.getElementById('userSearchModalInput');
+            input.value = '';
+            filterUserCards('');
+            input.focus();
+        }
+
+        function filterUserCards(keyword) {
+            const cleanKey = removeVietnameseTones(keyword);
+            const items = document.querySelectorAll('.user-picker-item');
+            let matchCount = 0;
+
+            items.forEach(item => {
+                const searchData = removeVietnameseTones(item.getAttribute('data-search'));
+                if (!cleanKey || searchData.includes(cleanKey)) {
+                    item.style.display = '';
+                    matchCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            const countText = document.getElementById('userMatchCountText');
+            if (cleanKey) {
+                countText.innerText = `Tìm thấy ${matchCount} nhân sự phù hợp với "${keyword}"`;
+            } else {
+                countText.innerText = `Đang hiển thị toàn bộ ${items.length} nhân sự`;
             }
+        }
+
+        function selectUserFromModal(userId) {
+            const item = document.querySelector(`.user-picker-item[data-id="${userId}"]`);
+            if (!item) return;
+
+            const fullname = item.getAttribute('data-fullname');
+            const dept = item.getAttribute('data-dept');
+            const email = item.getAttribute('data-email');
+            const username = item.getAttribute('data-username');
+
+            document.getElementById('userIdInput').value = userId;
+            document.getElementById('selectedUserText').value = fullname + (username ? ` (${username})` : '') + (dept ? ` - ${dept}` : '');
+
+            if (fullname) document.getElementById('ownerInput').value = fullname;
+            if (dept) document.getElementById('deptInput').value = dept;
+            if (email) document.getElementById('emailInput').value = email;
+            var localDom = document.getElementById('localDomainInput');
+            if (localDom && !localDom.value && username) {
+                localDom.value = username;
+            }
+
+            const modalEl = document.getElementById('userPickerModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+
+        function clearSelectedUser() {
+            document.getElementById('userIdInput').value = '';
+            document.getElementById('selectedUserText').value = '';
         }
     </script>
 }

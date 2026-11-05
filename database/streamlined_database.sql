@@ -1,4 +1,4 @@
-﻿-- ==========================================================================================
+-- ==========================================================================================
 -- CSDL IT ASSET MANAGEMENT - KIẾN TRÚC TINH GỌN (5 BẢNG NGHIỆP VỤ + 1 LỊCH SỬ ĐIỀU CHUYỂN)
 -- HOÀN TOÀN KHÔNG KHÓA NGOẠI (DECOUPLED) - CHUẨN UNICODE & FORMAT MM/DD/YYYY
 -- ==========================================================================================
@@ -18,7 +18,7 @@ IF OBJECT_ID('dbo.NguoiDung', 'U') IS NOT NULL DROP TABLE dbo.NguoiDung;
 GO
 CREATE TABLE dbo.Users (
     Id INT IDENTITY(1,1) PRIMARY KEY,
-    Username NVARCHAR(50) NOT NULL,
+    Username NVARCHAR(50) NULL,
     PasswordHash NVARCHAR(255) NULL,
     FullName NVARCHAR(150) NOT NULL,
     Email NVARCHAR(150) NULL,

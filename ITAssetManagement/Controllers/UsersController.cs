@@ -94,21 +94,28 @@ namespace ITAssetManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Kiểm tra trùng username
-                bool exists = await _context.Users.AnyAsync(u => u.Username.ToLower() == user.Username.Trim().ToLower());
-                if (exists)
+                if (!string.IsNullOrWhiteSpace(user.Username))
                 {
-                    ModelState.AddModelError("Username", "Tên đăng nhập (Username) này đã tồn tại trong hệ thống!");
-                    return View(user);
+                    user.Username = user.Username.Trim();
+                    // Kiểm tra trùng username nếu có nhập
+                    bool exists = await _context.Users.AnyAsync(u => u.Username != null && u.Username.ToLower() == user.Username.ToLower());
+                    if (exists)
+                    {
+                        ModelState.AddModelError("Username", "Tên đăng nhập (Username) này đã tồn tại trong hệ thống!");
+                        return View(user);
+                    }
+                }
+                else
+                {
+                    user.Username = null;
                 }
 
-                user.Username = user.Username.Trim();
                 user.FullName = user.FullName.Trim();
                 user.CreatedAt = DateTime.Now;
 
                 _context.Add(user);
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = $"Đã thêm thành công nhân sự [{user.FullName}] ({user.Username})!";
+                TempData["SuccessMessage"] = $"Đã thêm thành công nhân sự [{user.FullName}]" + (!string.IsNullOrEmpty(user.Username) ? $" ({user.Username})" : "") + "!";
                 return RedirectToAction(nameof(Index));
             }
             return View(user);
@@ -134,17 +141,24 @@ namespace ITAssetManagement.Controllers
 
             if (ModelState.IsValid)
             {
-                // Kiểm tra trùng username với user khác
-                bool duplicate = await _context.Users.AnyAsync(u => u.Username.ToLower() == user.Username.Trim().ToLower() && u.Id != id);
-                if (duplicate)
+                if (!string.IsNullOrWhiteSpace(user.Username))
                 {
-                    ModelState.AddModelError("Username", "Tên đăng nhập (Username) này đã được sử dụng bởi người khác!");
-                    return View(user);
+                    user.Username = user.Username.Trim();
+                    // Kiểm tra trùng username với user khác nếu có nhập
+                    bool duplicate = await _context.Users.AnyAsync(u => u.Username != null && u.Username.ToLower() == user.Username.ToLower() && u.Id != id);
+                    if (duplicate)
+                    {
+                        ModelState.AddModelError("Username", "Tên đăng nhập (Username) này đã được sử dụng bởi người khác!");
+                        return View(user);
+                    }
+                }
+                else
+                {
+                    user.Username = null;
                 }
 
                 try
                 {
-                    user.Username = user.Username.Trim();
                     user.FullName = user.FullName.Trim();
                     _context.Update(user);
                     await _context.SaveChangesAsync();
