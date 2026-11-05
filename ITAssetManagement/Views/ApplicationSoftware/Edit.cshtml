@@ -3,6 +3,8 @@
 @{
     ViewData["Title"] = "Chỉnh sửa Phần mềm / Ứng dụng";
     var users = ViewBag.Users as List<ITAssetManagement.Models.User> ?? new List<ITAssetManagement.Models.User>();
+    var devices = ViewBag.Devices as List<string> ?? new List<string>();
+    var userDevices = ViewBag.UserDevices as Dictionary<int, string> ?? new Dictionary<int, string>();
 }
 
 <div class="row justify-content-center">
@@ -26,16 +28,26 @@
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Gán cho Nhân sự (Users)</label>
-                            <select asp-for="UserId" class="form-select" id="userSelect" onchange="onUserChanged()">
-                                <option value="">-- Chọn nhân sự (Tùy chọn) --</option>
-                                @foreach (var u in users)
-                                {
-                                    <option value="@u.Id" data-fullname="@u.FullName" data-dept="@u.Department" selected="@(Model.UserId == u.Id)">
-                                        @u.FullName (@u.Username) - @u.Department
-                                    </option>
-                                }
-                            </select>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-semibold mb-0">Gán cho Nhân sự (Users)</label>
+                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" onclick="openUserPickerModal()">
+                                    <i class="bi bi-search me-1"></i>Tìm nhân sự
+                                </button>
+                            </div>
+                            <div class="input-group">
+                                <input type="hidden" asp-for="UserId" id="userIdInput" />
+                                <input type="text" class="form-control" id="selectedUserText" readonly
+                                       placeholder="-- Bấm nút tìm kiếm để chọn nhân sự --"
+                                       value="@(users.FirstOrDefault(u => u.Id == Model.UserId) != null ? $"{users.First(u => u.Id == Model.UserId).FullName}{(string.IsNullOrEmpty(users.First(u => u.Id == Model.UserId).Username) ? "" : $" ({users.First(u => u.Id == Model.UserId).Username})")}{(string.IsNullOrEmpty(users.First(u => u.Id == Model.UserId).Department) ? "" : $" - {users.First(u => u.Id == Model.UserId).Department}")}" : (!string.IsNullOrEmpty(Model.Owner) ? Model.Owner : ""))" />
+                                <button type="button" class="btn btn-outline-primary" onclick="openUserPickerModal()" title="Tìm & Chọn nhân sự">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="clearSelectedUser()" title="Xóa chọn">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                            <div class="form-text small" style="font-size: 11px;">Bấm tìm kiếm nhanh không dấu để tự điền Họ tên, Phòng ban, Tên máy</div>
+                            <span asp-validation-for="UserId" class="text-danger small"></span>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="Owner" class="form-label fw-semibold">Người sử dụng (Owner) <span class="text-danger">*</span></label>
@@ -51,7 +63,13 @@
                         </div>
                         <div class="col-md-6">
                             <label asp-for="May" class="form-label fw-semibold">Tên máy cài đặt</label>
-                            <input asp-for="May" class="form-control" />
+                            <input asp-for="May" class="form-control" id="mayInput" list="deviceList" />
+                            <datalist id="deviceList">
+                                @foreach (var dev in devices)
+                                {
+                                    <option value="@dev" />
+                                }
+                            </datalist>
                         </div>
                     </div>
 
@@ -60,7 +78,21 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label asp-for="UngDung" class="form-label fw-semibold">Tên phần mềm / Ứng dụng <span class="text-danger">*</span></label>
-                            <input asp-for="UngDung" class="form-control" required />
+                            <input asp-for="UngDung" class="form-control" required list="commonApps" />
+                            <datalist id="commonApps">
+                                <option value="Office 365 (Word, Excel, PowerPoint, Outlook)" />
+                                <option value="Google Chrome" />
+                                <option value="Unikey" />
+                                <option value="Foxit PDF Reader" />
+                                <option value="Ultraviewer" />
+                                <option value="WinRAR" />
+                                <option value="Zalo Workplace" />
+                                <option value="Zoom Workplace" />
+                                <option value="AutoCAD" />
+                                <option value="PowerBI Desktop" />
+                                <option value="SS4U ERP" />
+                                <option value="Adobe Acrobat Pro" />
+                            </datalist>
                             <span asp-validation-for="UngDung" class="text-danger small"></span>
                         </div>
                         <div class="col-md-3">
@@ -108,18 +140,198 @@
     </div>
 </div>
 
+<!-- ============================================================
+     SEARCHABLE USER PICKER MODAL
+     ============================================================ -->
+<div class="modal fade" id="userPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg border-0" style="border-radius: var(--radius-lg); overflow: hidden;">
+            <div class="modal-header bg-white py-3 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="stat-icon blue" style="width: 36px; height: 36px; font-size: 16px;">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <h6 class="modal-title fw-bold text-dark mb-0">Chọn Nhân sự cài đặt Phần mềm</h6>
+                        <small class="text-muted">Gõ để tìm nhanh theo Họ tên, Chức vụ, Email hoặc Phòng ban</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Search Bar in Modal -->
+            <div class="p-3 border-bottom bg-light">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="userSearchModalInput" class="form-control border-start-0 ps-0" 
+                           placeholder="🔍 Gõ tìm kiếm... (vd: Xíu, Duy, Phong, RnD, Kế toán...)" autocomplete="off" autofocus />
+                    <button class="btn btn-outline-secondary" type="button" onclick="clearUserSearch()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2 px-1">
+                    <small class="text-muted" id="userMatchCountText">Đang hiển thị toàn bộ nhân sự</small>
+                    <small class="text-muted fst-italic">Hỗ trợ tìm tiếng Việt có dấu và không dấu</small>
+                </div>
+            </div>
+
+            <!-- Scrollable User Cards -->
+            <div class="modal-body p-3" style="max-height: 420px; overflow-y: auto;">
+                <div class="row g-2" id="userCardsContainer">
+                    @foreach (var u in users)
+                    {
+                        string fullname = u.FullName ?? "";
+                        string dept = u.Department ?? "";
+                        string pos = u.Position ?? "Nhân viên";
+                        string email = u.Email ?? "";
+                        string username = u.Username ?? "";
+                        string deviceModel = userDevices.ContainsKey(u.Id) ? userDevices[u.Id] : "";
+                        string initial = !string.IsNullOrEmpty(fullname) ? fullname.Substring(0, 1).ToUpper() : "U";
+
+                        <div class="col-md-6 user-picker-item" 
+                             data-id="@u.Id"
+                             data-fullname="@fullname"
+                             data-dept="@dept"
+                             data-position="@pos"
+                             data-email="@email"
+                             data-username="@username"
+                             data-device="@deviceModel"
+                             data-search="@(fullname + " " + dept + " " + pos + " " + email + " " + username + " " + deviceModel)">
+                            <div class="p-3 border rounded-3 bg-white h-100 d-flex align-items-center gap-3 user-item-card"
+                                 onclick="selectUserFromModal('@u.Id')"
+                                 style="cursor: pointer; transition: all 0.15s ease;">
+                                <div class="user-avatar-circle flex-shrink-0" 
+                                     style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--brand-orange-dark) 0%, var(--brand-orange-light) 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px;">
+                                    @initial
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="fw-bold text-dark text-truncate" style="font-size: 14px;">@fullname</div>
+                                    <div class="d-flex align-items-center gap-1 my-1 flex-wrap">
+                                        @if (!string.IsNullOrEmpty(dept))
+                                        {
+                                            <span class="badge bg-light text-secondary border small" style="font-size: 11px;">@dept</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(pos))
+                                        {
+                                            <span class="badge bg-light text-dark border small" style="font-size: 11px;">@pos</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(deviceModel))
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary border small" style="font-size: 11px;"><i class="bi bi-laptop me-1"></i>@deviceModel</span>
+                                        }
+                                    </div>
+                                    <div class="small text-muted text-truncate" style="font-size: 12px;">
+                                        <i class="bi bi-person me-1"></i>@(string.IsNullOrEmpty(username) ? (string.IsNullOrEmpty(email) ? "Không có tài khoản" : email) : username)
+                                    </div>
+                                </div>
+                                <div class="text-primary flex-shrink-0 opacity-0 select-icon">
+                                    <i class="bi bi-check-circle-fill fs-5"></i>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .user-item-card:hover {
+        border-color: var(--color-primary) !important;
+        background-color: var(--color-primary-light) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .user-item-card:hover .select-icon {
+        opacity: 1 !important;
+    }
+</style>
+
 @section Scripts {
     <script>
-        function onUserChanged() {
-            var select = document.getElementById('userSelect');
-            var selectedOption = select.options[select.selectedIndex];
-            if (selectedOption && selectedOption.value) {
-                var name = selectedOption.getAttribute('data-fullname');
-                var dept = selectedOption.getAttribute('data-dept');
-                if (name) document.getElementById('ownerInput').value = name;
-                if (dept) document.getElementById('deptInput').value = dept;
+        function removeVietnameseTones(str) {
+            if (!str) return '';
+            str = str.toLowerCase();
+            str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            str = str.replace(/[đĐ]/g, 'd');
+            return str.trim();
+        }
+
+        function openUserPickerModal() {
+            const modalEl = document.getElementById('userPickerModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+
+            setTimeout(() => {
+                const searchInput = document.getElementById('userSearchModalInput');
+                searchInput.value = '';
+                filterUserCards('');
+                searchInput.focus();
+            }, 300);
+        }
+
+        document.getElementById('userSearchModalInput').addEventListener('input', function() {
+            filterUserCards(this.value);
+        });
+
+        function clearUserSearch() {
+            const input = document.getElementById('userSearchModalInput');
+            input.value = '';
+            filterUserCards('');
+            input.focus();
+        }
+
+        function filterUserCards(keyword) {
+            const cleanKey = removeVietnameseTones(keyword);
+            const items = document.querySelectorAll('.user-picker-item');
+            let matchCount = 0;
+
+            items.forEach(item => {
+                const searchData = removeVietnameseTones(item.getAttribute('data-search'));
+                if (!cleanKey || searchData.includes(cleanKey)) {
+                    item.style.display = '';
+                    matchCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            const countText = document.getElementById('userMatchCountText');
+            if (cleanKey) {
+                countText.innerText = `Tìm thấy ${matchCount} nhân sự phù hợp với "${keyword}"`;
+            } else {
+                countText.innerText = `Đang hiển thị toàn bộ ${items.length} nhân sự`;
             }
+        }
+
+        function selectUserFromModal(userId) {
+            const item = document.querySelector(`.user-picker-item[data-id="${userId}"]`);
+            if (!item) return;
+
+            const fullname = item.getAttribute('data-fullname');
+            const dept = item.getAttribute('data-dept');
+            const username = item.getAttribute('data-username');
+            const device = item.getAttribute('data-device');
+
+            document.getElementById('userIdInput').value = userId;
+            document.getElementById('selectedUserText').value = fullname + (username ? ` (${username})` : '') + (dept ? ` - ${dept}` : '');
+
+            if (fullname) document.getElementById('ownerInput').value = fullname;
+            if (dept) document.getElementById('deptInput').value = dept;
+            const mayInput = document.getElementById('mayInput');
+            if (mayInput && device && !mayInput.value) {
+                mayInput.value = device;
+            }
+
+            const modalEl = document.getElementById('userPickerModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+
+        function clearSelectedUser() {
+            document.getElementById('userIdInput').value = '';
+            document.getElementById('selectedUserText').value = '';
         }
     </script>
 }
-

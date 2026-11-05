@@ -110,9 +110,24 @@ namespace ITAssetManagement.Controllers
                     app.PhongBan = user.Department;
                 }
             }
+            else if (userId == null && !string.IsNullOrEmpty(owner))
+            {
+                var matchedUser = await _context.Users.FirstOrDefaultAsync(u => u.FullName.ToLower() == owner.Trim().ToLower());
+                if (matchedUser != null)
+                {
+                    app.UserId = matchedUser.Id;
+                    if (string.IsNullOrEmpty(app.PhongBan)) app.PhongBan = matchedUser.Department;
+                }
+            }
 
             ViewBag.Users = await _context.Users.OrderBy(u => u.FullName).ToListAsync();
             ViewBag.Devices = await _context.ThietBis.Where(t => !string.IsNullOrEmpty(t.Model)).Select(t => t.Model!).Distinct().ToListAsync();
+
+            var userDevices = await _context.ThietBis
+                .Where(t => t.UserId != null && !string.IsNullOrEmpty(t.Model))
+                .GroupBy(t => t.UserId!.Value)
+                .ToDictionaryAsync(g => g.Key, g => g.First().Model ?? "");
+            ViewBag.UserDevices = userDevices;
 
             return View(app);
         }
@@ -142,6 +157,11 @@ namespace ITAssetManagement.Controllers
             }
 
             ViewBag.Users = await _context.Users.OrderBy(u => u.FullName).ToListAsync();
+            ViewBag.Devices = await _context.ThietBis.Where(t => !string.IsNullOrEmpty(t.Model)).Select(t => t.Model!).Distinct().ToListAsync();
+            ViewBag.UserDevices = await _context.ThietBis
+                .Where(t => t.UserId != null && !string.IsNullOrEmpty(t.Model))
+                .GroupBy(t => t.UserId!.Value)
+                .ToDictionaryAsync(g => g.Key, g => g.First().Model ?? "");
             return View(app);
         }
 
@@ -153,7 +173,22 @@ namespace ITAssetManagement.Controllers
             var app = await _context.ApplicationSoftwares.FindAsync(id);
             if (app == null) return NotFound();
 
+            if (app.UserId == null && !string.IsNullOrEmpty(app.Owner))
+            {
+                var matchedUser = await _context.Users.FirstOrDefaultAsync(u => u.FullName.ToLower() == app.Owner.Trim().ToLower());
+                if (matchedUser != null)
+                {
+                    app.UserId = matchedUser.Id;
+                }
+            }
+
             ViewBag.Users = await _context.Users.OrderBy(u => u.FullName).ToListAsync();
+            ViewBag.Devices = await _context.ThietBis.Where(t => !string.IsNullOrEmpty(t.Model)).Select(t => t.Model!).Distinct().ToListAsync();
+            ViewBag.UserDevices = await _context.ThietBis
+                .Where(t => t.UserId != null && !string.IsNullOrEmpty(t.Model))
+                .GroupBy(t => t.UserId!.Value)
+                .ToDictionaryAsync(g => g.Key, g => g.First().Model ?? "");
+
             return View(app);
         }
 
@@ -166,6 +201,16 @@ namespace ITAssetManagement.Controllers
 
             if (ModelState.IsValid)
             {
+                if (app.UserId != null)
+                {
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == app.UserId);
+                    if (user != null)
+                    {
+                        if (string.IsNullOrEmpty(app.Owner)) app.Owner = user.FullName;
+                        if (string.IsNullOrEmpty(app.PhongBan)) app.PhongBan = user.Department;
+                    }
+                }
+
                 try
                 {
                     _context.Update(app);
@@ -183,6 +228,11 @@ namespace ITAssetManagement.Controllers
             }
 
             ViewBag.Users = await _context.Users.OrderBy(u => u.FullName).ToListAsync();
+            ViewBag.Devices = await _context.ThietBis.Where(t => !string.IsNullOrEmpty(t.Model)).Select(t => t.Model!).Distinct().ToListAsync();
+            ViewBag.UserDevices = await _context.ThietBis
+                .Where(t => t.UserId != null && !string.IsNullOrEmpty(t.Model))
+                .GroupBy(t => t.UserId!.Value)
+                .ToDictionaryAsync(g => g.Key, g => g.First().Model ?? "");
             return View(app);
         }
 
