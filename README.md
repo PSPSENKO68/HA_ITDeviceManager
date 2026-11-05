@@ -134,3 +134,4 @@ Người dùng cuối có thể khởi chạy bằng 1 trong các cách sau:
 * **Bộ phận phát triển:** Đội ngũ Công nghệ Thông tin (IT Department).
 * **Tác giả chính:** Nguyễn Hoàng Khánh Duy ([@DUYNGUYENHK](https://github.com/DUYNGUYENHK) • [@PSPSENKO68](https://github.com/PSPSENKO68))
 * **Bản quyền:** © 2026 Hoàng Anh Group. All rights reserved.
+
