@@ -13,9 +13,10 @@
    - [Tầng 3: Bộ não điều phối nghiệp vụ (Controllers)](#tầng-3-bộ-não-điều-phối-nghiệp-vụ-controllers)
    - [Tầng 4: Giao diện hiển thị & Tương tác (Razor Views & JavaScript)](#tầng-4-giao-diện-hiển-thị--tương-tác-razor-views--javascript)
 3. [Tại sao phải dùng Model thay vì thao tác trực tiếp với Database / Dữ liệu thô?](#3-tại-sao-phải-dùng-model-thay-vì-thao-tác-trực-tiếp-với-database--dữ-liệu-thô)
-4. [Phân tích 2 tình huống thực tế (Case Study)](#4-phân-tích-2-tình-huống-thực-tế-case-study)
+4. [Phân tích 3 tình huống thực tế (Case Study)](#4-phân-tích-3-tình-huống-thực-tế-case-study)
    - [Case Study 1: Luồng hiển thị danh sách gom nhóm](#case-study-1-luồng-hiển-thị-danh-sách-gom-nhóm-applicationsoftwareindex)
    - [Case Study 2: Luồng Modal tra cứu & Gán nhân sự tự động](#case-study-2-luồng-modal-tra-cứu--gán-nhân-sự-tự-động)
+   - [Case Study 3: Quy trình Quản trị Vòng đời Thiết bị (Nhập kho -> Cấp phát -> Thu hồi)](#case-study-3-quy-trình-quản-trị-vòng-đời-thiết-bị-nhập-kho---cấp-phát---thu-hồi)
 5. [Đánh giá bảo mật & Điểm chí mạng của hệ thống và mô hình MVC](#5-đánh-giá-bảo-mật--điểm-chí-mạng-của-hệ-thống-và-mô-hình-mvc)
    - [A. Hệ thống hiện tại có đủ bảo mật không?](#a-hệ-thống-hiện-tại-có-đủ-bảo-mật-không)
    - [B. 3 Điểm chí mạng của ứng dụng hiện tại](#b-3-điểm-chí-mạng-của-ứng-dụng-hiện-tại)
@@ -289,6 +290,40 @@ Không phải cột nào dưới SQL Server cũng được phép đưa lên giao
    - Gọi `_context.Add(app); await _context.SaveChangesAsync();`.
    - Dữ liệu ghi thành công vào SQL Server -> Chuyển về trang danh sách kèm thông báo xanh (Toast).
 ```
+
+---
+
+### Case Study 3: Quy trình Quản trị Vòng đời Thiết bị (Nhập kho -> Cấp phát -> Thu hồi)
+
+Một quy trình quản trị tài sản IT chuẩn doanh nghiệp diễn ra theo đúng chu kỳ 3 bước khép kín:
+
+```mermaid
+flowchart LR
+    A["1. MUA MỚI & NHẬP KHO\n(ThietBi/Create)\n- Nhập Model, Serial, Ngày mua\n- Người dùng: Để trống\n=> Tự vào 'Kho IT (Sẵn sàng)'"] --> B["2. CẤP PHÁT CHO USER\n(BienBan/Create)\n- Chọn máy từ tab Kho IT\n- Chọn User nhận máy\n- In Word ký tên\n=> Máy tự sang tên User"]
+    B --> C["3. THU HỒI KHI NGHỈ VIỆC\n(BienBan/Create)\n- Chọn biên bản Thu hồi\n- Chọn User trả máy\n- In Word ký xác nhận\n=> Máy tự động quay về Kho IT"]
+    C --> B
+```
+
+#### Bước 1: Mua mới & Nhập kho IT (`/ThietBi/Create`)
+* **Hành động:** Khi máy mới về công ty kèm hóa đơn, IT vào **Thêm thiết bị mới**, nhập Model, Serial, Cấu hình, Thời gian đầu tư (tháng/năm mua) và HSD ban đầu.
+* **Logic tự động:** Nếu người sử dụng để trống, hệ thống tự động:
+  - Gán `Owner = "Kho IT"` và `PhongBan = "IT"`.
+  - Hiển thị huy hiệu xanh lá cây: `[📦 Kho IT (Sẵn sàng)]` trên trang danh sách.
+  - Tự động ghi nhật ký vào bảng `LichSuDieuChuyen`: *"Ghi nhận tài sản mới vào Kho IT từ Nhà cung cấp"*.
+
+#### Bước 2: Bàn giao cấp phát cho nhân sự (`/BienBan/Create`)
+* **Hành động:** Khi nhân sự mới nhận việc hoặc nhân viên cũ đổi máy, IT vào **Biên bản Bàn giao $\to$ Cấp phát**.
+* **Logic tự động:**
+  - Bấm chọn thiết bị từ tab **"Kho IT"** $\to$ Toàn bộ thông số máy và thời gian đầu tư tự động điền vào biên bản.
+  - Bấm chọn User nhận $\to$ Tự động điền Họ tên, Chức vụ, Phòng ban, Email M365, Domain.
+  - In file Word (.docx) để 2 bên ký tên lưu hồ sơ.
+  - Bấm **"Lưu lịch sử điều chuyển"**: Hệ thống tự động chuyển máy từ *"Kho IT"* sang tên nhân viên đó.
+
+#### Bước 3: Thu hồi khi nhân viên nghỉ việc / đổi máy (`/BienBan/Create`)
+* **Hành động:** Khi nhân sự nghỉ việc, IT chọn loại biên bản **"Thu hồi"**.
+* **Logic tự động:**
+  - Chọn nhân sự trả máy $\to$ Tự động kéo thông tin thiết bị đang giữ, tài khoản Email M365 và các phân hệ ERP cần khóa.
+  - Bấm **"Lưu lịch sử điều chuyển"**: Thiết bị lập tức được thu hồi và tự động quay trở về trạng thái **"Kho IT (Sẵn sàng)"** để chờ cấp phát cho người tiếp theo mà không cần phải vào sửa thiết bị thủ công.
 
 ---
 

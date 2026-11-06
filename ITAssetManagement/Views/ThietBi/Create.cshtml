@@ -57,8 +57,11 @@
             </div>
 
             <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white py-3 fw-bold">
-                    <i class="bi bi-person-badge text-primary me-2"></i>2. Người sử dụng & Vị trí
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold"><i class="bi bi-person-badge text-primary me-2"></i>2. Người sử dụng & Vị trí</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle fw-normal">
+                        <i class="bi bi-box-seam me-1"></i>Mặc định lưu vào Kho IT nếu để trống người dùng
+                    </span>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
@@ -72,7 +75,7 @@
                             <div class="input-group">
                                 <input type="hidden" asp-for="UserId" id="userIdInput" />
                                 <input type="text" class="form-control" id="selectedUserText" readonly
-                                       placeholder="-- Bấm nút tìm kiếm để chọn nhân sự --"
+                                       placeholder="-- Để trống nếu nhập kho IT (Sẵn sàng cấp phát) --"
                                        value="@(users.FirstOrDefault(u => u.Id == Model?.UserId) != null ? $"{users.First(u => u.Id == Model.UserId).FullName}{(string.IsNullOrEmpty(users.First(u => u.Id == Model.UserId).Username) ? "" : $" ({users.First(u => u.Id == Model.UserId).Username})")}{(string.IsNullOrEmpty(users.First(u => u.Id == Model.UserId).Department) ? "" : $" - {users.First(u => u.Id == Model.UserId).Department}")}" : (!string.IsNullOrEmpty(Model?.Owner) ? Model.Owner : ""))" />
                                 <button type="button" class="btn btn-outline-primary" onclick="openUserPickerModal()" title="Tìm & Chọn nhân sự">
                                     <i class="bi bi-search"></i>
@@ -81,15 +84,15 @@
                                     <i class="bi bi-x-lg"></i>
                                 </button>
                             </div>
-                            <div class="form-text small" style="font-size: 11px;">Bấm tìm kiếm nhanh không dấu để tự điền Họ tên và Phòng ban</div>
+                            <div class="form-text small" style="font-size: 11px;">Bấm tìm kiếm nhanh để gán người dùng, hoặc để trống để máy tự động vào <strong>Kho IT</strong></div>
                         </div>
                         <div class="col-md-3">
                             <label asp-for="Owner" class="form-label fw-semibold">Người sử dụng (Owner)</label>
-                            <input asp-for="Owner" class="form-control" id="ownerInput" placeholder="Họ và tên nhân viên..." />
+                            <input asp-for="Owner" class="form-control" id="ownerInput" placeholder="Để trống nếu lưu vào Kho IT..." />
                         </div>
                         <div class="col-md-3">
                             <label asp-for="PhongBan" class="form-label fw-semibold">Phòng ban / Bộ phận</label>
-                            <input asp-for="PhongBan" class="form-control" id="deptInput" placeholder="VD: RnD, Commercial, Kế toán..." />
+                            <input asp-for="PhongBan" class="form-control" id="deptInput" placeholder="Để trống (mặc định IT)..." />
                         </div>
                     </div>
                 </div>

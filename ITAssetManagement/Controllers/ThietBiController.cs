@@ -110,10 +110,51 @@ namespace ITAssetManagement.Controllers
                     }
                 }
 
+                // LOGIC NHẬP KHO: Nếu không gán cho nhân sự nào, mặc định đưa vào Kho IT sẵn sàng cấp phát
+                bool isNhapKho = string.IsNullOrWhiteSpace(thietBi.Owner) || thietBi.Owner.Trim().ToLower() == "kho it";
+                if (isNhapKho)
+                {
+                    thietBi.Owner = "Kho IT";
+                    thietBi.UserId = null;
+                    if (string.IsNullOrWhiteSpace(thietBi.PhongBan))
+                    {
+                        thietBi.PhongBan = "IT";
+                    }
+                }
+
                 thietBi.NgayTao = DateTime.Now;
                 _context.Add(thietBi);
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Thêm thiết bị mới thành công!";
+
+                // Tự động ghi nhận lịch sử điều chuyển đầu tiên: Nhập kho mới vào hệ thống
+                var history = new LichSuDieuChuyen
+                {
+                    ThietBiId = thietBi.Id,
+                    ThietBiSerial = thietBi.SerialNumber,
+                    LoaiHanhDong = isNhapKho ? "Nhập kho mới" : "Cấp phát mới",
+                    Ngay = !string.IsNullOrWhiteSpace(thietBi.ThoiGianDauTu) ? thietBi.ThoiGianDauTu : DateTime.Today.ToString("MM/dd/yyyy"),
+                    NguoiThucHien = "IT Admin",
+                    OwnerCu = "Nhà cung cấp / Mua mới",
+                    PhongBanCu = "Nhà cung cấp",
+                    OwnerMoi = thietBi.Owner,
+                    PhongBanMoi = thietBi.PhongBan,
+                    ChiTiet = isNhapKho 
+                        ? $"Ghi nhận tài sản mới vào Kho IT: {thietBi.Model} (SN: {thietBi.SerialNumber})" 
+                        : $"Nhập thiết bị mới và cấp phát trực tiếp cho {thietBi.Owner} ({thietBi.PhongBan})",
+                    NgayTao = DateTime.Now
+                };
+                _context.LichSuDieuChuyens.Add(history);
+                await _context.SaveChangesAsync();
+
+                if (isNhapKho)
+                {
+                    TempData["SuccessMessage"] = $"Đã ghi nhận tài sản [{thietBi.Model}] vào Kho IT thành công, sẵn sàng cấp phát!";
+                }
+                else
+                {
+                    TempData["SuccessMessage"] = $"Đã thêm thiết bị [{thietBi.Model}] và gán cho [{thietBi.Owner}] thành công!";
+                }
+
                 return RedirectToAction(nameof(Index), new { nhomThietBi = thietBi.NhomThietBi });
             }
             ViewBag.ExistingGroups = await _context.ThietBis.Select(t => t.NhomThietBi).Distinct().ToListAsync();
