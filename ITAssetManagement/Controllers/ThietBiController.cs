@@ -84,6 +84,21 @@ namespace ITAssetManagement.Controllers
             return View();
         }
 
+        private string? FormatDateToDb(string? dateStr)
+        {
+            if (string.IsNullOrWhiteSpace(dateStr)) return null;
+            string[] formats = { "yyyy-MM-dd", "M/d/yyyy", "MM/dd/yyyy", "d/M/yyyy", "dd/MM/yyyy", "yyyy/MM/dd" };
+            if (DateTime.TryParseExact(dateStr.Trim(), formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var dt))
+            {
+                return dt.ToString("MM/dd/yyyy");
+            }
+            if (DateTime.TryParse(dateStr.Trim(), out dt))
+            {
+                return dt.ToString("MM/dd/yyyy");
+            }
+            return dateStr.Trim();
+        }
+
         // POST: ThietBi/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -91,6 +106,12 @@ namespace ITAssetManagement.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Chuẩn hóa định dạng ngày từ date picker về MM/dd/yyyy lưu trong CSDL
+                thietBi.ThoiGianDauTu = FormatDateToDb(thietBi.ThoiGianDauTu);
+                thietBi.HsdbanDau = FormatDateToDb(thietBi.HsdbanDau);
+                thietBi.ThoiGianBaoTri = FormatDateToDb(thietBi.ThoiGianBaoTri);
+                thietBi.HsdgiaHan = FormatDateToDb(thietBi.HsdgiaHan);
+
                 if (thietBi.UserId != null)
                 {
                     var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == thietBi.UserId);
@@ -193,6 +214,12 @@ namespace ITAssetManagement.Controllers
 
             if (ModelState.IsValid)
             {
+                // Chuẩn hóa định dạng ngày từ date picker về MM/dd/yyyy lưu trong CSDL
+                thietBi.ThoiGianDauTu = FormatDateToDb(thietBi.ThoiGianDauTu);
+                thietBi.HsdbanDau = FormatDateToDb(thietBi.HsdbanDau);
+                thietBi.ThoiGianBaoTri = FormatDateToDb(thietBi.ThoiGianBaoTri);
+                thietBi.HsdgiaHan = FormatDateToDb(thietBi.HsdgiaHan);
+
                 if (thietBi.UserId != null)
                 {
                     var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == thietBi.UserId);

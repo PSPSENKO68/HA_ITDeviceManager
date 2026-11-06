@@ -3,6 +3,21 @@
 @{
     ViewData["Title"] = "Thêm mới thiết bị";
     var users = ViewBag.Users as List<ITAssetManagement.Models.User> ?? new List<ITAssetManagement.Models.User>();
+
+    string FormatForDateInput(string? dateStr)
+    {
+        if (string.IsNullOrWhiteSpace(dateStr)) return "";
+        string[] formats = { "yyyy-MM-dd", "M/d/yyyy", "MM/dd/yyyy", "d/M/yyyy", "dd/MM/yyyy", "yyyy/MM/dd" };
+        if (DateTime.TryParseExact(dateStr.Trim(), formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var dt))
+        {
+            return dt.ToString("yyyy-MM-dd");
+        }
+        if (DateTime.TryParse(dateStr.Trim(), out dt))
+        {
+            return dt.ToString("yyyy-MM-dd");
+        }
+        return dateStr;
+    }
 }
 
 <div class="row justify-content-center">
@@ -131,18 +146,25 @@
                 <div class="card-body">
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
-                            <label asp-for="ThoiGianDauTu" class="form-label fw-semibold">Thời gian đầu tư / Mua sắm</label>
-                            <input asp-for="ThoiGianDauTu" class="form-control" placeholder="VD: 08/2023 hoặc 08/15/2023..." />
-                            <div class="form-text small" style="font-size: 11px;">Thời điểm công ty mua thiết bị hoặc nhập kho IT</div>
+                            <label class="form-label fw-semibold">Thời gian đầu tư / Mua sắm</label>
+                            <input name="ThoiGianDauTu" type="date" class="form-control" id="thoiGianDauTuInput" 
+                                   value="@FormatForDateInput(Model?.ThoiGianDauTu)" onchange="onThoiGianDauTuChanged()" />
+                            <div class="form-text small" style="font-size: 11px;">Chọn ngày mua máy / nhập kho IT</div>
                         </div>
                         <div class="col-md-4">
-                            <label asp-for="HsdbanDau" class="form-label fw-semibold">Hạn sử dụng ban đầu (HSD)</label>
-                            <input asp-for="HsdbanDau" class="form-control" placeholder="VD: 08/2026..." />
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-semibold mb-0">Hạn sử dụng ban đầu (HSD)</label>
+                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" onclick="setWarrantyMonths(36)" style="font-size: 11px;">
+                                    <i class="bi bi-magic me-1"></i>Tự tính +36 tháng
+                                </button>
+                            </div>
+                            <input name="HsdbanDau" type="date" class="form-control" id="hsdBanDauInput" 
+                                   value="@FormatForDateInput(Model?.HsdbanDau)" onchange="checkNienHan(this.value)" />
                             <div class="form-text small" style="font-size: 11px;">Hạn khấu hao / bảo hành tiêu chuẩn (36 tháng)</div>
                         </div>
                         <div class="col-md-4">
                             <label asp-for="NienHanBanDau" class="form-label fw-semibold">Niên hạn ban đầu</label>
-                            <select asp-for="NienHanBanDau" class="form-select">
+                            <select asp-for="NienHanBanDau" class="form-select" id="nienHanBanDauSelect">
                                 <option value="Trong niên hạn">Trong niên hạn</option>
                                 <option value="Đã hết hạn">Đã hết hạn</option>
                             </select>
@@ -151,12 +173,16 @@
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
-                            <label asp-for="ThoiGianBaoTri" class="form-label">Thời gian bảo trì / Kiểm tra</label>
-                            <input asp-for="ThoiGianBaoTri" class="form-control" placeholder="VD: 10/2024..." />
+                            <label class="form-label">Thời gian bảo trì / Kiểm tra</label>
+                            <input name="ThoiGianBaoTri" type="date" class="form-control" id="thoiGianBaoTriInput" 
+                                   value="@FormatForDateInput(Model?.ThoiGianBaoTri)" />
+                            <div class="form-text small" style="font-size: 11px;">Lần bảo dưỡng gần nhất</div>
                         </div>
                         <div class="col-md-4">
-                            <label asp-for="HsdgiaHan" class="form-label">HSD gia hạn (sau bảo dưỡng)</label>
-                            <input asp-for="HsdgiaHan" class="form-control" placeholder="VD: 08/2028..." />
+                            <label class="form-label">HSD gia hạn (sau bảo dưỡng)</label>
+                            <input name="HsdgiaHan" type="date" class="form-control" id="hsdGiaHanInput" 
+                                   value="@FormatForDateInput(Model?.HsdgiaHan)" />
+                            <div class="form-text small" style="font-size: 11px;">Thời hạn bảo dưỡng kéo dài</div>
                         </div>
                         <div class="col-md-4">
                             <label asp-for="KichHoat" class="form-label fw-semibold">Trạng thái kích hoạt</label>
@@ -371,6 +397,51 @@
         function clearSelectedUser() {
             document.getElementById('userIdInput').value = '';
             document.getElementById('selectedUserText').value = '';
+        }
+
+        function onThoiGianDauTuChanged() {
+            const dauTuVal = document.getElementById('thoiGianDauTuInput').value;
+            const hsdInput = document.getElementById('hsdBanDauInput');
+            if (dauTuVal && !hsdInput.value) {
+                // Tự động tính HSD 3 năm (36 tháng) sau ngày đầu tư
+                const d = new Date(dauTuVal);
+                if (!isNaN(d.getTime())) {
+                    d.setFullYear(d.getFullYear() + 3);
+                    const yyyy = d.getFullYear();
+                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                    const dd = String(d.getDate()).padStart(2, '0');
+                    hsdInput.value = `${yyyy}-${mm}-${dd}`;
+                    checkNienHan(hsdInput.value);
+                }
+            }
+        }
+
+        function setWarrantyMonths(months) {
+            const dauTuVal = document.getElementById('thoiGianDauTuInput').value;
+            const hsdInput = document.getElementById('hsdBanDauInput');
+            const baseDate = dauTuVal ? new Date(dauTuVal) : new Date();
+            if (!isNaN(baseDate.getTime())) {
+                baseDate.setMonth(baseDate.getMonth() + months);
+                const yyyy = baseDate.getFullYear();
+                const mm = String(baseDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(baseDate.getDate()).padStart(2, '0');
+                hsdInput.value = `${yyyy}-${mm}-${dd}`;
+                checkNienHan(hsdInput.value);
+            }
+        }
+
+        function checkNienHan(hsdVal) {
+            if (!hsdVal) return;
+            const hsdDate = new Date(hsdVal);
+            const today = new Date();
+            const select = document.getElementById('nienHanBanDauSelect');
+            if (select) {
+                if (hsdDate < today) {
+                    select.value = 'Đã hết hạn';
+                } else {
+                    select.value = 'Trong niên hạn';
+                }
+            }
         }
     </script>
 }
