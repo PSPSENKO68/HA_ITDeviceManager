@@ -91,6 +91,25 @@ namespace ITAssetManagement.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (thietBi.UserId != null)
+                {
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == thietBi.UserId);
+                    if (user != null)
+                    {
+                        if (string.IsNullOrEmpty(thietBi.Owner)) thietBi.Owner = user.FullName;
+                        if (string.IsNullOrEmpty(thietBi.PhongBan)) thietBi.PhongBan = user.Department;
+                    }
+                }
+                else if (!string.IsNullOrEmpty(thietBi.Owner))
+                {
+                    var matchedUser = await _context.Users.FirstOrDefaultAsync(u => u.FullName.ToLower() == thietBi.Owner.Trim().ToLower());
+                    if (matchedUser != null)
+                    {
+                        thietBi.UserId = matchedUser.Id;
+                        if (string.IsNullOrEmpty(thietBi.PhongBan)) thietBi.PhongBan = matchedUser.Department;
+                    }
+                }
+
                 thietBi.NgayTao = DateTime.Now;
                 _context.Add(thietBi);
                 await _context.SaveChangesAsync();
@@ -110,6 +129,15 @@ namespace ITAssetManagement.Controllers
             var thietBi = await _context.ThietBis.FindAsync(id);
             if (thietBi == null) return NotFound();
 
+            if (thietBi.UserId == null && !string.IsNullOrEmpty(thietBi.Owner))
+            {
+                var matchedUser = await _context.Users.FirstOrDefaultAsync(u => u.FullName.ToLower() == thietBi.Owner.Trim().ToLower());
+                if (matchedUser != null)
+                {
+                    thietBi.UserId = matchedUser.Id;
+                }
+            }
+
             ViewBag.ExistingGroups = await _context.ThietBis.Select(t => t.NhomThietBi).Distinct().ToListAsync();
             ViewBag.Users = await _context.Users.OrderBy(u => u.FullName).ToListAsync();
             return View(thietBi);
@@ -124,6 +152,16 @@ namespace ITAssetManagement.Controllers
 
             if (ModelState.IsValid)
             {
+                if (thietBi.UserId != null)
+                {
+                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == thietBi.UserId);
+                    if (user != null)
+                    {
+                        if (string.IsNullOrEmpty(thietBi.Owner)) thietBi.Owner = user.FullName;
+                        if (string.IsNullOrEmpty(thietBi.PhongBan)) thietBi.PhongBan = user.Department;
+                    }
+                }
+
                 try
                 {
                     thietBi.NgayCapNhat = DateTime.Now;
