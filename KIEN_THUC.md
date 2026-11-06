@@ -22,6 +22,10 @@
    - [B. 3 Điểm chí mạng của ứng dụng hiện tại](#b-3-điểm-chí-mạng-của-ứng-dụng-hiện-tại)
    - [C. 4 Điểm chí mạng kinh điển của mô hình kiến trúc MVC](#c-4-điểm-chí-mạng-kinh-điển-của-mô-hình-kiến-trúc-mvc)
 6. [Bộ câu hỏi & Trả lời nhanh khi Sếp / Phỏng vấn hỏi (Cheat Sheet)](#6-bộ-câu-hỏi--trả-lời-nhanh-khi-sếp--phỏng-vấn-hỏi-cheat-sheet)
+7. [Kịch bản thuyết trình báo cáo cho Sếp (Executive Presentation Guide)](#7-kịch-bản-thuyết-trình-báo-cáo-cho-sếp-executive-presentation-guide)
+   - [A. Bảng đối chiếu Trước & Sau (Before vs After)](#a-bảng-đối-chiếu-trước--sau-before-vs-after)
+   - [B. Kịch bản thuyết trình 5 phút (Nói từng phút chuẩn xác)](#b-kịch-bản-thuyết-trình-5-phút-chuẩn-chỉ-dành-cho-sếp)
+   - [C. Các tình huống Sếp hỏi xoáy & Cách trả lời thông minh](#c-các-tình-huống-sếp-hỏi-xoáy--cách-trả-lời-thông-minh)
 
 ---
 
@@ -423,5 +427,102 @@ flowchart LR
 > **Trả lời:**  
 > *"Dạ ứng dụng được bảo vệ rất tốt trước **SQL Injection, CSRF và XSS** nhờ cơ chế mặc định của .NET 10 & EF Core. Điểm yếu bảo mật lớn nhất hiện tại là **chưa có phân quyền đăng nhập thực tế (RBAC)** — ai mở app lên cũng có quyền Admin. Điểm chí mạng về kiến trúc của MVC là hiện tượng **'Fat Controller'** khi dự án lớn dần. Hướng nâng cấp chuẩn tiếp theo sẽ là tích hợp Module Đăng nhập Identity và bổ sung Service Layer để tách bớt nghiệp vụ ra khỏi Controller."*
 
+#### Q7: "Ủa tôi đâu có bật SSMS (SQL Server Management Studio) đâu mà sao ứng dụng vẫn chạy được?"
+> **Trả lời:**  
+> *"Dạ Sếp yên tâm, **SSMS chỉ là cái 'giao diện đồ họa' (Client Tool)** để con người mở lên xem bảng biểu và gõ lệnh cho tiện mắt — giống như phần mềm Notepad hay trình duyệt web vậy thôi ạ.  
+> Còn **trái tim lưu trữ dữ liệu thực sự là một Windows Service chạy ngầm** có tên `MSSQLSERVER` hoặc `MSSQL$SQLEXPRESS` (tiến trình `sqlservr.exe`). Service này luôn tự động chạy ngầm cùng Windows ngay khi bật máy tính. Ứng dụng IT Asset của mình kết nối trực tiếp đến Service ngầm này qua đường truyền mạng nội bộ (cổng 1433 hoặc Named Pipes). Do đó, dù máy tính tắt hoàn toàn SSMS hay thậm chí không cài SSMS thì phần mềm vẫn đọc/ghi dữ liệu bình thường 100% ạ."*
+
+#### Q8: "Quy trình thiết bị chuẩn khi mua mới, cấp phát và thu hồi chạy như thế nào trong phần mềm?"
+> **Trả lời:**  
+> *"Dạ phần mềm quản trị khép kín toàn bộ **Vòng đời tài sản (Asset Lifecycle)** qua 3 bước tự động:  
+> 1. **Nhập kho mới:** Khi mua máy về, IT vào 'Thêm mới thiết bị', điền cấu hình, số Serial, ngày mua và **để trống người dùng**. Bấm Lưu $\rightarrow$ Máy tự động chuyển vào **Kho IT (Kho dự phòng)** và hệ thống tự ghi nhật ký 'Nhập kho mới'.  
+> 2. **Cấp phát cho nhân sự:** Khi có nhân viên mới nhận máy, IT vào 'Biên bản bàn giao' $\rightarrow$ Tạo biên bản. Hệ thống tự động gán máy cho nhân viên đó, chuyển trạng thái máy sang 'Đang sử dụng', đồng thời **xuất ngay 1 file Word Biên bản bàn giao chuẩn** có đầy đủ chữ ký để lưu trữ pháp lý.  
+> 3. **Thu hồi khi nghỉ việc:** Khi nhân viên thôi việc, IT chỉ cần lập Biên bản thu hồi. Máy tự động bị ngắt khỏi nhân sự đó, quay trở về **Kho IT** và sẵn sàng cấp phát cho người tiếp theo mà không sợ thất lạc hay quên mất tài sản."*
+
 ---
-*Tài liệu được cập nhật ngày 05/11/2026 bởi Đội ngũ Kỹ thuật CNTT Hoàng Anh Group.*
+
+## 7. KỊCH BẢN THUYẾT TRÌNH BÁO CÁO CHO SẾP (EXECUTIVE PRESENTATION GUIDE)
+
+> [!TIP]
+> **Mục tiêu của buổi báo cáo:** Giúp Sếp thấy rõ **giá trị kinh tế**, **sự chuyên nghiệp trong quản trị rủi ro** và **tính minh bạch tài sản** của Tập đoàn Hoàng Anh — không đi quá sâu vào thuật ngữ kỹ thuật trừ khi Sếp hỏi.
+
+---
+
+### A. BẢNG ĐỐI CHIẾU TRƯỚC & SAU (BEFORE VS AFTER)
+
+| Tiêu chí so sánh | Quản lý thủ công qua Excel cũ | Hệ thống IT Asset Management Pro v2.0 |
+| :--- | :--- | :--- |
+| **Tính toàn vẹn dữ liệu** | Rất dễ gõ nhầm, bấm xóa nhầm dòng, không có kiểm tra định dạng Serial Number hay ngày tháng. | Có cơ chế Validation chặt chẽ, bắt buộc nhập đúng chuẩn, bảo vệ toàn vẹn dữ liệu. |
+| **Đồng bộ & Truy cập** | Lưu file rời rạc trên máy cá nhân hoặc OneDrive; dễ bị đè file (`v1`, `v2_final`), xung đột dữ liệu khi nhiều người sửa. | CSDL tập trung SQL Server; toàn bộ phòng ban truy xuất dữ liệu thời gian thực (Real-time). |
+| **Quản trị Vòng đời máy** | Không rõ máy đang ở kho hay ai cầm; khi nhân viên nghỉ việc dễ bị "quên" thu hồi linh kiện/máy móc. | Tự động phân luồng: **Kho IT $\rightarrow$ Bàn giao $\rightarrow$ Thu hồi về kho**; lưu vết từng giây trong Lịch sử điều chuyển. |
+| **Tính pháp lý & Biên bản** | Phải mở Word lên gõ tay tên người, số Serial, cấu hình máy từng chữ một $\rightarrow$ Mất 15-20 phút/biên bản. | **1 Click xuất file Word bàn giao chuẩn** theo nhận diện Hoàng Anh Group, tự động điền đầy đủ thông số. |
+| **Kiểm soát Khấu hao & Hạn bảo hành** | Phải ngồi soi từng dòng xem máy nào sắp hết hạn bảo hành; dễ bỏ lỡ cơ hội bảo dưỡng định kỳ. | **Hệ thống tự tính chuẩn 36 tháng**, cảnh báo ngay trên màn hình thiết bị nào trong hạn, thiết bị nào đã hết hạn. |
+| **Chi phí đầu tư phần mềm** | Miễn phí nhưng tốn hàng chục giờ công lao động mỗi tháng và nguy cơ thất thoát tài sản hàng trăm triệu. | **Tự phát triển nội bộ (In-house): 0 đồng tiền bản quyền hàng tháng**, sở hữu vĩnh viễn mã nguồn. |
+
+---
+
+### B. KỊCH BẢN THUYẾT TRÌNH 5 PHÚT CHUẨN CHỈ DÀNH CHO SẾP
+
+#### Phút 1: Đặt vấn đề & Bối cảnh (Tại sao cần phần mềm này?)
+- *"Kính thưa Sếp, hiện tại Tập đoàn chúng ta sở hữu hàng trăm thiết bị công nghệ (Laptop, PC, Máy in, Thiết bị mạng) cùng hàng loạt bản quyền phần mềm phân bổ khắp các phòng ban như RnD, Commercial, Kế toán..."*
+- *"Trước đây, việc quản lý bằng các file Excel rời rạc gặp 3 rủi ro lớn: (1) Rất dễ thất thoát tài sản khi nhân sự luân chuyển hoặc nghỉ việc; (2) Mất nhiều thời gian soạn thảo biên bản bàn giao giấy tờ; (3) Không nắm được hạn bảo hành và lịch sử sửa chữa của máy móc."*
+- *"Hôm nay em xin phép trình bày với Sếp giải pháp **Hệ thống Quản lý Tài sản CNTT (IT Asset Management Pro v2.0)** do đội ngũ IT nội bộ tự phát triển để giải quyết triệt để các bài toán trên."*
+
+#### Phút 2: Trình diễn Giao diện & Trải nghiệm (Look & Feel)
+- *(Mở trang Dashboard hoặc Danh sách thiết bị)*
+- *"Đầu tiên về mặt thiết kế, ứng dụng được xây dựng theo phong cách hiện đại, trực quan, tinh gọn chuẩn Apple Minimalist kết hợp bộ nhận diện màu sắc đặc trưng của Hoàng Anh Group."*
+- *"Phần mềm chạy như một ứng dụng độc lập trên máy tính: nhân sự IT chỉ cần click đúp là mở ngay, giao diện phản hồi tức thì dưới 0.1 giây, hoàn toàn không có độ trễ."*
+
+#### Phút 3: Trình diễn 2 Tính năng cốt lõi (Live Demo)
+1. **Tính năng Quản lý Kho & Cấp phát thông minh:**
+   - *"Khi công ty mua thiết bị mới, IT chỉ mất 30 giây để nhập thông tin và ngày đầu tư. Máy sẽ tự động vào **Kho IT dự phòng**."*
+   - *"Khi cần cấp cho nhân sự, IT chỉ cần mở ô tìm kiếm, gõ nhanh tên nhân viên không dấu (ví dụ: 'xiu'), hệ thống sẽ tự động điền thông tin và liên kết thiết bị với nhân sự đó mà không bao giờ bị nhầm lẫn."*
+2. **Tính năng Tự động sinh Biên bản Bàn giao chuẩn pháp lý:**
+   - *(Bấm vào mục Biên bản bàn giao $\rightarrow$ Bấm Xem/In)*
+   - *"Điểm đặc biệt nhất: Thay vì mất 20 phút soạn biên bản Word thủ công, hệ thống chỉ cần 1 click để sinh ra file Biên bản bàn giao có đầy đủ điều khoản bảo mật thông tin, trách nhiệm người dùng và chỗ ký tên của các bên, sẵn sàng in ra ký nhận ngay lập tức."*
+
+#### Phút 4: Quản lý Niên hạn, Chi phí & Lịch sử sửa chữa
+- *(Mở tab Chi tiết thiết bị hoặc Bảo trì)*
+- *"Hệ thống tự động tính toán niên hạn khấu hao 36 tháng cho từng máy tính. IT và Ban Giám đốc có thể nắm ngay được thiết bị nào sắp hết bảo hành để lên kế hoạch bảo dưỡng định kỳ, tránh tình trạng máy đột ngột hỏng hóc gây gián đoạn công việc của nhân viên."*
+- *"Mỗi lần thay thế linh kiện (nâng RAM, thay ổ cứng) hoặc điều chuyển máy qua người khác, hệ thống đều lưu lại lịch sử chi tiết đến từng phút. Không ai có thể gian lận hoặc tráo đổi linh kiện mà không bị phát hiện."*
+
+#### Phút 5: Giá trị mang lại & Kế hoạch tương lai
+- *"Tóm lại, hệ thống này mang lại cho Hoàng Anh Group 3 giá trị lớn:*
+  1. ***Minh bạch 100% tài sản:*** *Biết chính xác từng con chuột, từng chiếc laptop trị giá bao nhiêu và đang nằm ở tay ai.*
+  2. ***Tiết kiệm chi phí:*** *Tiết kiệm 80% thời gian giấy tờ hành chính cho IT và hoàn toàn không tốn chi phí thuê phần mềm bên ngoài.*
+  3. ***Bảo mật & Chủ động:*** *Dữ liệu lưu an toàn trên máy chủ công ty, dễ dàng nâng cấp theo bất kỳ yêu cầu mới nào của Tập đoàn.*
+- *"Trong giai đoạn tới, nhóm dự kiến sẽ bổ sung thêm tính năng Quét mã QR code trên thân máy và Cổng tự phục vụ (Self-service Portal) để nhân viên tự tra cứu thiết bị được cấp phát của mình."*
+- *"Em xin trân trọng cảm ơn Sếp đã lắng nghe và rất mong nhận được ý kiến chỉ đạo từ Sếp ạ!"*
+
+---
+
+### C. CÁC TÌNH HUỐNG SẾP HỎI XOÁY & CÁCH TRẢ LỜI THÔNG MINH
+
+#### Tình huống 1: "Tại sao công ty không dùng luôn Google Sheets hay Excel cho tiện, việc gì phải kỳ công viết phần mềm?"
+> **Cách trả lời thông minh:**  
+> *"Dạ thưa Sếp, Excel rất tốt cho việc ghi chép sổ sách nhỏ lẻ, nhưng với quy mô hàng trăm thiết bị công nghệ giá trị cao thì Excel có 3 lỗ hổng chí mạng:  
+> - **Thứ nhất là rủi ro mất tài sản:** Excel không ràng buộc được lịch sử bàn giao, nhân viên nghỉ việc rất dễ bàn giao sót linh kiện hoặc màn hình phụ mà IT không kiểm soát được.  
+> - **Thứ hai là tính toàn vẹn dữ liệu:** Bất kỳ ai vô tình bấm nhầm phím Delete hoặc gõ đè cũng làm mất dữ liệu gốc của cả công ty mà không có cách nào truy vết ai là người sửa.  
+> - **Thứ ba là tính chuyên nghiệp:** Phần mềm của mình tự động xuất biên bản Word chuẩn có chữ ký pháp lý chỉ trong 1 click, giúp quy trình quản trị tài sản của Hoàng Anh Group đạt chuẩn ISO và kiểm toán chuyên nghiệp ạ."*
+
+#### Tình huống 2: "Phần mềm này có tốn tiền duy trì hàng tháng không? Có phụ thuộc vào bên thứ ba nào không?"
+> **Cách trả lời thông minh:**  
+> *"Dạ hoàn toàn **0 đồng chi phí định kỳ** ạ! Đây là sản phẩm do đội ngũ IT nội bộ tự chủ công nghệ 100%, sử dụng nền tảng của Microsoft (.NET và SQL Server). Chúng ta sở hữu trọn đời mã nguồn, không phải trả phí thuê bao người dùng hàng tháng như các phần mềm SaaS bên ngoài thị trường (thường tốn từ 20 đến 50 triệu/năm), đồng thời công ty muốn tùy biến thêm bớt tính năng nào thì IT đều chủ động làm được ngay ạ."*
+
+#### Tình huống 3: "Dữ liệu lưu ở đâu? Có sợ bị lộ ra ngoài Internet hoặc mất hết dữ liệu nếu máy hỏng không?"
+> **Cách trả lời thông minh:**  
+> *"Dạ Sếp hoàn toàn yên tâm về mặt an toàn thông tin:  
+> 1. Dữ liệu được lưu trữ trên **Cơ sở dữ liệu SQL Server nội bộ (On-Premise)** trong mạng LAN của công ty, hoàn toàn không bị đưa lên các đám mây công cộng bên ngoài nên không sợ rò rỉ dữ liệu mật.  
+> 2. Cơ sở dữ liệu có kịch bản sao lưu tự động (Backup định kỳ ra file `.bak`). Ngay cả khi máy tính của IT gặp sự cố phần cứng, IT chỉ cần phục hồi file backup sang máy chủ dự phòng trong vòng 10 phút là toàn bộ dữ liệu trở lại nguyên vẹn ạ."*
+
+#### Tình huống 4: "Sau này nếu em chuyển công tác hoặc bận việc khác, người mới vào có quản trị và sửa được phần mềm này không?"
+> **Cách trả lời thông minh:**  
+> *"Dạ thưa Sếp, phần mềm được xây dựng tuân thủ 100% theo **kiến trúc MVC chuẩn quốc tế của Microsoft** — đây là chuẩn mực ngành mà bất kỳ kỹ sư phần mềm nào cũng được đào tạo bài bản.  
+> Hơn nữa, toàn bộ mã nguồn đều được ghi chú rõ ràng và đính kèm cuốn **Cẩm nang kiến trúc hệ thống (`KIEN_THUC.md`)** chi tiết từ luồng dữ liệu, cấu trúc database cho đến cách bảo trì. Nhân sự IT mới vào chỉ cần đọc tài liệu là có thể nắm bắt và tiếp quản vận hành trơn tru ngay trong ngày đầu tiên ạ."*
+
+#### Tình huống 5: "Nếu mạng Internet của công ty bị mất thì phần mềm có bị đứng không?"
+> **Cách trả lời thông minh:**  
+> *"Dạ không hề bị ảnh hưởng ạ! Ứng dụng chạy trên mạng nội bộ (mạng LAN) giữa các máy tính trong văn phòng và máy chủ dữ liệu. Dù đường truyền cáp quang Internet ra quốc tế có bị đứt thì phần mềm quản lý thiết bị và in ấn biên bản bàn giao vẫn hoạt động bình thường 100% không suy suyển ạ."*
+
+---
+*Tài liệu được cập nhật ngày 06/11/2026 bởi Đội ngũ Kỹ thuật CNTT Hoàng Anh Group.*
