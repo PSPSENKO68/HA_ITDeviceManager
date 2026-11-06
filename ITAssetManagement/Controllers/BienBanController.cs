@@ -309,6 +309,12 @@ namespace ITAssetManagement.Controllers
                     {
                         dev.Owner = model.NguoiNhan;
                         dev.PhongBan = model.BoPhan_Nhan;
+
+                        // Nếu thiết bị chưa có thời gian đầu tư, tự động cập nhật theo thời gian cấp phát
+                        if (string.IsNullOrWhiteSpace(dev.ThoiGianDauTu) && !string.IsNullOrWhiteSpace(model.ThoiGianCap))
+                        {
+                            dev.ThoiGianDauTu = model.ThoiGianCap;
+                        }
                     }
                 }
             }

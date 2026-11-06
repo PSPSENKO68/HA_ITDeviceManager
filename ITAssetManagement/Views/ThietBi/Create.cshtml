@@ -123,27 +123,55 @@
 
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white py-3 fw-bold">
-                    <i class="bi bi-tools text-primary me-2"></i>4. Niên hạn & Bảo trì
+                    <i class="bi bi-tools text-primary me-2"></i>4. Niên hạn, Đầu tư & Bảo trì
                 </div>
                 <div class="card-body">
-                    <div class="row g-3">
+                    <div class="row g-3 mb-3">
                         <div class="col-md-4">
-                            <label asp-for="NienHanBanDau" class="form-label">Niên hạn ban đầu</label>
+                            <label asp-for="ThoiGianDauTu" class="form-label fw-semibold">Thời gian đầu tư / Mua sắm</label>
+                            <input asp-for="ThoiGianDauTu" class="form-control" placeholder="VD: 08/2023 hoặc 08/15/2023..." />
+                            <div class="form-text small" style="font-size: 11px;">Thời điểm công ty mua thiết bị hoặc nhập kho IT</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="HsdbanDau" class="form-label fw-semibold">Hạn sử dụng ban đầu (HSD)</label>
+                            <input asp-for="HsdbanDau" class="form-control" placeholder="VD: 08/2026..." />
+                            <div class="form-text small" style="font-size: 11px;">Hạn khấu hao / bảo hành tiêu chuẩn (36 tháng)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="NienHanBanDau" class="form-label fw-semibold">Niên hạn ban đầu</label>
                             <select asp-for="NienHanBanDau" class="form-select">
                                 <option value="Trong niên hạn">Trong niên hạn</option>
                                 <option value="Đã hết hạn">Đã hết hạn</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
                         <div class="col-md-4">
-                            <label asp-for="KichHoat" class="form-label">Trạng thái kích hoạt</label>
-                            <select asp-for="KichHoat" class="form-select">
-                                <option value="Enabled">Enabled (Đang hoạt động)</option>
-                                <option value="Disabled">Disabled (Tạm ngưng/Hỏng)</option>
-                            </select>
+                            <label asp-for="ThoiGianBaoTri" class="form-label">Thời gian bảo trì / Kiểm tra</label>
+                            <input asp-for="ThoiGianBaoTri" class="form-control" placeholder="VD: 10/2024..." />
                         </div>
                         <div class="col-md-4">
+                            <label asp-for="HsdgiaHan" class="form-label">HSD gia hạn (sau bảo dưỡng)</label>
+                            <input asp-for="HsdgiaHan" class="form-control" placeholder="VD: 08/2028..." />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="KichHoat" class="form-label fw-semibold">Trạng thái kích hoạt</label>
+                            <select asp-for="KichHoat" class="form-select">
+                                <option value="Enabled">Enabled (Đang hoạt động)</option>
+                                <option value="Disabled">Disabled (Tạm ngưng/Hỏng/Kho)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-8">
                             <label asp-for="KhuyenNghiIt" class="form-label">Khuyến nghị IT</label>
-                            <input asp-for="KhuyenNghiIt" class="form-control" placeholder="VD: Đề xuất nâng cấp RAM..." />
+                            <input asp-for="KhuyenNghiIt" class="form-control" placeholder="VD: Đề xuất nâng cấp RAM 16GB, cài lại Windows..." />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="ChiPhiDuKien" class="form-label">Chi phí bảo trì dự kiến (VNĐ)</label>
+                            <input asp-for="ChiPhiDuKien" class="form-control" type="number" step="10000" placeholder="VD: 500000..." />
                         </div>
                     </div>
                 </div>
